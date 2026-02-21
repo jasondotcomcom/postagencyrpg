@@ -77,6 +77,7 @@ const HELP_TEXT = `OmniPubDent IT Terminal — Authorized Commands Only
   run [name]            Execute approved tool
   delete [name]         Delete tool (requires manager sign-off)
   clear                 Clear terminal output
+  voluntary-separation  Initiate resource offboarding (irreversible)
 
 All commands are logged per IT Policy 7.1.1.
 Unauthorized command attempts will be forwarded to Pat.`;
@@ -100,6 +101,39 @@ const I_QUIT_LINES: Array<[LineType, string]> = [
   ['info',    '  ──────────────────────────────────────────'],
   ['info',    '  The real agency is at agencyrpg.com'],
   ['info',    '  ──────────────────────────────────────────'],
+  ['blank',   ''],
+];
+
+const TERMINATION_WARNING: Array<[LineType, string]> = [
+  ['blank',   ''],
+  ['error',   '⚠  RESOURCE TERMINATION PROTOCOL INITIATED'],
+  ['blank',   ''],
+  ['output',  'NOTICE: You are requesting voluntary separation from OmniPubDent Holdings.'],
+  ['blank',   ''],
+  ['output',  'This will permanently delete:'],
+  ['output',  '  - Your employee record'],
+  ['output',  '  - Compliance history'],
+  ['output',  '  - All workflow and project data'],
+  ['output',  '  - Deliverables archive'],
+  ['blank',   ''],
+  ['error',   'Per Policy 7.3, this action is irreversible.'],
+  ['blank',   ''],
+  ['info',    'Type  I RESIGN  to confirm separation.'],
+  ['info',    'Type  cancel   to return to your workstation.'],
+  ['blank',   ''],
+];
+
+const TERMINATION_CONFIRMED: Array<[LineType, string]> = [
+  ['blank',   ''],
+  ['output',  'Processing separation request...'],
+  ['output',  '  ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓  100%'],
+  ['blank',   ''],
+  ['success', 'Employee record deleted.'],
+  ['success', 'Compliance history purged.'],
+  ['success', 'Workflow data removed.'],
+  ['blank',   ''],
+  ['info',    'Thank you for your service to OmniPubDent.'],
+  ['info',    '"Together, we optimize." — OmniPubDent HR'],
   ['blank',   ''],
 ];
 
@@ -362,6 +396,7 @@ export default function TerminalApp(): React.ReactElement {
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [isBuilding, setIsBuilding] = useState(false);
   const [tools, setTools] = useState<AgencyTool[]>(loadTools);
+  const [awaitingTermination, setAwaitingTermination] = useState(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const outputRef = useRef<HTMLDivElement>(null);
@@ -631,6 +666,41 @@ export default function TerminalApp(): React.ReactElement {
     const parts = trimmed.split(/\s+/);
     const command = parts[0].toLowerCase();
     const args = parts.slice(1).join(' ');
+
+    // ─── Termination confirmation intercept ─────────────────────────────────
+    if (awaitingTermination) {
+      if (trimmed === 'I RESIGN') {
+        const employeeId = localStorage.getItem('agencyrpg-employee-id') ?? '????';
+        addLines(TERMINATION_CONFIRMED);
+        setTimeout(() => {
+          addLines([
+            ['info', `Resource #${employeeId} has been processed.`],
+            ['blank', ''],
+          ]);
+        }, 800);
+        setTimeout(() => {
+          try {
+            Object.keys(localStorage).forEach(key => {
+              if (key.startsWith('agencyrpg')) localStorage.removeItem(key);
+            });
+          } catch { /* non-fatal */ }
+          window.location.reload();
+        }, 3200);
+      } else if (lower === 'cancel') {
+        setAwaitingTermination(false);
+        addLines([
+          ['output', 'Termination request cancelled.'],
+          ['output', 'Please return to your workstation.'],
+          ['blank',  ''],
+        ]);
+      } else {
+        addLines([
+          ['error',  'Invalid confirmation. Type  I RESIGN  to proceed or  cancel  to abort.'],
+          ['blank',  ''],
+        ]);
+      }
+      return;
+    }
 
     // ─── I QUIT — escape sequence ────────────────────────────────────────────
     if (lower === 'i quit' || lower === 'quit' && trimmed === 'QUIT' || trimmed === 'I QUIT') {
@@ -1531,8 +1601,18 @@ Human Resources
       ]);
     }
 
-    else if (lower === 'exit' || lower === 'quit' || lower === ':q' || lower === ':wq') {
-      addLine('output', "Use the × button to close the terminal. (We're not done yet.)");
+    else if (
+      lower === 'voluntary-separation' ||
+      lower === 'terminate'            ||
+      lower === 'resign'               ||
+      lower === 'separation'           ||
+      lower === 'quit'                 ||
+      lower === 'exit'                 ||
+      lower === ':q'                   ||
+      lower === ':wq'
+    ) {
+      setAwaitingTermination(true);
+      addLines(TERMINATION_WARNING);
     }
 
     // ─── Built-in commands ─────────────────────────────────────────────────
@@ -1702,6 +1782,7 @@ Human Resources
     applyScoreBonus, applyMinScore, setOneTimeMinScore, toggleNightmareMode,
     toggleBigHeadMode, setHRWatcherActive, recordCheatUsed, cheat,
     unlockAchievement, unlockedAchievements, incrementCounter,
+    awaitingTermination, setAwaitingTermination,
   ]);
 
   // ─── Input handlers ──────────────────────────────────────────────────────
