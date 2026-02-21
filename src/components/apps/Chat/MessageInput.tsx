@@ -70,9 +70,16 @@ KEY TEST: Did the director acknowledge the work OR show appreciation OR provide 
   YES → at minimum "neutral", usually "supportive" → moraleImpact: "same" or "up"
   NO (pure avoidance/dismissal) → "dismissive" → moraleImpact: "down"
 
-Include 1-2 reactions from: copywriter, art-director, strategist, pm, suit, media, technologist
-Reactions should sound natural and match the team member's personality.
-Delays: first reaction at 2000-3000ms, second at 4000-6000ms.`;
+Include 1-2 reactions from: copywriter, strategist, suit, pm, vance, hr, contractor
+Team personalities (for authentic reactions):
+- copywriter: cautious, compliance-minded, avoids conflict
+- strategist: analytical, data-driven, speaks in metrics
+- suit: overly positive, buzzword-heavy, always "aligns with objectives"
+- pm: task-focused, mentions timelines and capacity
+- vance: uses jargon, talks about "synergies" and "leverage"
+- hr: cheerful, mentions policy, always "circling back"
+- contractor: terse, professional, signs off formally
+Reactions should sound natural and corporate. Delays: first at 2000-3000ms, second at 4000-6000ms.`;
 
   const response = await fetch('/api/anthropic/v1/messages', {
     method: 'POST',
