@@ -29,47 +29,48 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps):
     <div className={styles.screen}>
       {legacy && (
         <div className={styles.welcomeBack}>
-          <span className={styles.runBadge}>Run #{runNumber}</span>
+          <span className={styles.runBadge}>Contract Renewal #{runNumber}</span>
           <p className={styles.welcomeBackText}>
-            Welcome back, {legacy.playerName}. Ready to do it all again?
+            Welcome back, {legacy.playerName}. They&#39;ve processed your rehire paperwork.
           </p>
         </div>
       )}
 
       <div className={styles.document}>
         <div className={styles.documentHeader}>
-          <span className={styles.seal} aria-hidden="true">⚖️</span>
-          <h1 className={styles.title}>ARTICLES OF INCORPORATION</h1>
+          <span className={styles.seal} aria-hidden="true">📋</span>
+          <h1 className={styles.title}>OFFER OF EMPLOYMENT</h1>
+          <p className={styles.subtitle}>OmniPubDent Holdings — Creative Services Division</p>
         </div>
 
         <div className={styles.documentBody}>
-          <p>This document hereby establishes a new creative advertising agency to be led by the undersigned.</p>
-          <p>The founding <strong>Creative Director</strong> agrees to:</p>
+          <p>Congratulations. After a thorough review process, OmniPubDent Holdings is pleased to extend this offer of at-will employment.</p>
+          <p>The undersigned <strong>Creative Services Associate</strong> agrees to:</p>
           <ul className={styles.list}>
-            <li>Pursue creative excellence</li>
-            <li>Manage client relationships</li>
-            <li>Lead a team of talented misfits</li>
-            <li>Never make the logo bigger*</li>
+            <li>Route all creative decisions through the appropriate approval chain</li>
+            <li>Complete mandatory training modules within 5 business days</li>
+            <li>Submit expense reports within 7 days using Form EX-22B*</li>
+            <li>Not make anything that surprises the Legal team</li>
           </ul>
-          <p className={styles.finePrint}>* unless absolutely necessary</p>
+          <p className={styles.finePrint}>* Form EX-22A is no longer accepted. This is non-negotiable.</p>
         </div>
 
         <div className={styles.signatureSection}>
-          <label htmlFor="signature" className={styles.signatureLabel}>Signature:</label>
+          <label htmlFor="signature" className={styles.signatureLabel}>Employee Signature (print clearly):</label>
           <input
             id="signature"
             type="text"
             value={playerName}
             onChange={(e) => setPlayerName(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Sign your name"
+            placeholder="Print your full name"
             className={`${styles.signatureInput} ${isTyping ? styles.signatureInputActive : ''}`}
             onFocus={() => setIsTyping(true)}
             onBlur={() => setIsTyping(false)}
             autoComplete="off"
             autoFocus
             maxLength={30}
-            aria-label="Sign your name to found the agency"
+            aria-label="Print your name to accept employment"
           />
         </div>
 
@@ -78,7 +79,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps):
           onClick={handleSubmit}
           disabled={playerName.trim().length < 2}
         >
-          FOUND MY AGENCY
+          ACCEPT OFFER & REPORT FOR DUTY
         </button>
       </div>
     </div>

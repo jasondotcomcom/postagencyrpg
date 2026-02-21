@@ -31,7 +31,7 @@ export default function InboxApp() {
       {/* Sidebar with email list */}
       <div className={styles.sidebar}>
         <div className={styles.sidebarHeader}>
-          <button className={styles.composeButton}>
+          <button className={styles.composeButton} disabled title="Coming soon">
             <span className={styles.composeIcon}>✏️</span>
             Compose
           </button>

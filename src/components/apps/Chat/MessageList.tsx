@@ -84,7 +84,7 @@ export default function MessageList(): React.ReactElement {
         ) : (
           messages.map((msg, idx) => {
             const member = msg.authorId === 'player'
-              ? { name: playerName || 'You', avatar: '👤', role: 'Creative Director' }
+              ? { name: playerName || 'You', avatar: '👤', role: 'Creative Services Associate' }
               : getTeamMember(msg.authorId);
             const prevMsg = idx > 0 ? messages[idx - 1] : null;
             const isGrouped =

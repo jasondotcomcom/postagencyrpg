@@ -1092,7 +1092,8 @@ export function SpinStopGame({
   targetAngle: number; tolerance: number; emoji: string;
   onWin: () => void; onFail: () => void;
 }) {
-  const [angle, setAngle] = useState(0);
+  const angleRef = useRef(0);
+  const [displayAngle, setDisplayAngle] = useState(0);
   const [spinning, setSpinning] = useState(true);
   const [stopped, setStopped] = useState(false);
   const speedRef = useRef(4);
@@ -1100,7 +1101,8 @@ export function SpinStopGame({
   useEffect(() => {
     if (!spinning) return;
     const interval = setInterval(() => {
-      setAngle(prev => (prev + speedRef.current) % 360);
+      angleRef.current = (angleRef.current + speedRef.current) % 360;
+      setDisplayAngle(angleRef.current);
     }, 16);
     return () => clearInterval(interval);
   }, [spinning]);
@@ -1109,8 +1111,8 @@ export function SpinStopGame({
     if (!spinning || stopped) return;
     setSpinning(false);
     setStopped(true);
-    // Check if within target zone
-    const diff = Math.abs(((angle - targetAngle + 540) % 360) - 180);
+    // Check using ref for instant, non-stale angle
+    const diff = Math.abs(((angleRef.current - targetAngle + 540) % 360) - 180);
     if (diff < tolerance) {
       onWin();
     } else {
@@ -1138,7 +1140,7 @@ export function SpinStopGame({
           <path d={`M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2} Z`}
             fill="rgba(168,230,207,0.25)" stroke="var(--color-mint)" strokeWidth="2" />
         </svg>
-        <div className={styles.spinNeedle} style={{ transform: `translate(-50%, -100%) rotate(${angle}deg)` }} />
+        <div className={styles.spinNeedle} style={{ transform: `translate(-50%, -100%) rotate(${displayAngle}deg)` }} />
         <div className={styles.spinEmoji}>{emoji}</div>
       </div>
       <div className={styles.spinLabel}>{spinning ? 'Click to stop!' : (stopped ? 'Stopped!' : '')}</div>

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import type { Campaign } from '../../../types/campaign';
 import { DELIVERABLE_TYPES, PLATFORMS } from '../../../types/campaign';
 import { useCampaignContext } from '../../../context/CampaignContext';
@@ -15,6 +15,7 @@ export default function GenerationPhase({ campaign }: GenerationPhaseProps): Rea
   const { generatingProgress, retryDeliverableGeneration } = useCampaignContext();
   const [isPlaying, setIsPlaying] = useState(false);
   const [showHelpToast, setShowHelpToast] = useState(true);
+  const ctaRef = useRef<HTMLButtonElement>(null);
 
   // Memoize by string key so campaign re-renders don't create new array references
   // (which would trigger MicroGames' pickMember useCallback and reset the active game)
@@ -34,7 +35,10 @@ export default function GenerationPhase({ campaign }: GenerationPhaseProps): Rea
       {showHelpToast && !isComplete && !isPlaying && (
         <HelpToast
           phase="generating"
-          onHelp={() => { setShowHelpToast(false); setIsPlaying(true); }}
+          onHelp={() => {
+            setShowHelpToast(false);
+            ctaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }}
           onDismiss={() => setShowHelpToast(false)}
         />
       )}
@@ -92,6 +96,7 @@ export default function GenerationPhase({ campaign }: GenerationPhaseProps): Rea
               <div className={styles.ctaSection}>
                 <div className={styles.ctaPrompt}>Want to help while you wait?</div>
                 <button
+                  ref={ctaRef}
                   className={styles.playButton}
                   onClick={() => setIsPlaying(true)}
                 >

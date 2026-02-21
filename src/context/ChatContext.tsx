@@ -13,9 +13,9 @@ import { getInitialMessages, getCampaignEventMessages } from '../data/chatMessag
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const CHANNELS: Channel[] = [
-  { id: 'general', name: 'general', description: 'Main team channel', icon: '#', readOnly: false },
-  { id: 'creative', name: 'creative', description: 'Creative team discussions', icon: '\uD83C\uDFA8', readOnly: true },
-  { id: 'random', name: 'random', description: 'Off-topic & fun', icon: '\uD83C\uDFB2', readOnly: false },
+  { id: 'general', name: 'all-staff', description: 'OmniPubDent approved communications', icon: '#', readOnly: false },
+  { id: 'creative', name: 'project-work', description: 'Project updates and deliverables', icon: '📁', readOnly: true },
+  { id: 'random', name: 'watercooler', description: 'Off-topic (monitored per Policy 2.4)', icon: '💬', readOnly: false },
 ];
 
 const initialState: ChatState = {

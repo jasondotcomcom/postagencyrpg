@@ -221,6 +221,7 @@ function windowReducer(state: WindowContextState, action: WindowAction): WindowC
           position: window.previousState?.position || window.position,
           size: window.previousState?.size || window.size,
           previousState: undefined,
+          zIndex: state.nextZIndex,
         });
       } else {
         // Maximize
@@ -236,6 +237,7 @@ function windowReducer(state: WindowContextState, action: WindowAction): WindowC
             width: window.size.width, // Will be overridden by CSS
             height: window.size.height,
           },
+          zIndex: state.nextZIndex,
         });
       }
 

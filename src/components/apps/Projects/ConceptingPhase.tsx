@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import type { Campaign, TeamMember } from '../../../types/campaign';
 import { calculateTeamCost, formatBudget } from '../../../types/campaign';
 import { useCampaignContext } from '../../../context/CampaignContext';
@@ -263,10 +263,11 @@ export default function ConceptingPhase({ campaign }: ConceptingPhaseProps): Rea
 function ConceptingWait({ members }: { members: TeamMember[] }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [showToast, setShowToast] = useState(true);
+  const ctaRef = useRef<HTMLButtonElement>(null);
 
   const handleHelpFromToast = () => {
     setShowToast(false);
-    setIsPlaying(true);
+    ctaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   };
 
   if (isPlaying) {
@@ -311,6 +312,7 @@ function ConceptingWait({ members }: { members: TeamMember[] }) {
 
           <div className={styles.ctaPrompt}>Want to help while you wait?</div>
           <button
+            ref={ctaRef}
             className={styles.playButton}
             onClick={() => setIsPlaying(true)}
           >

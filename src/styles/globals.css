@@ -1,54 +1,54 @@
 @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap');
 
 :root {
-  /* Soft Pastel Color Palette */
-  --color-mint: #a8e6cf;
-  --color-mint-light: #c7f0df;
-  --color-mint-dark: #7ed3b2;
+  /* OmniPubDent Corporate Color Standards v4.2 — Approved by Brand Committee */
+  --color-mint: #9ab0b0;
+  --color-mint-light: #b4c8c8;
+  --color-mint-dark: #7a9898;
 
-  --color-peach: #ffb7b2;
-  --color-peach-light: #ffd1ce;
-  --color-peach-dark: #ff9a94;
+  --color-peach: #b8a898;
+  --color-peach-light: #ccc0b4;
+  --color-peach-dark: #a09080;
 
-  --color-sky: #a8d8ea;
-  --color-sky-light: #c5e8f7;
-  --color-sky-dark: #7fc4dc;
+  --color-sky: #8fa8b8;
+  --color-sky-light: #a8bec8;
+  --color-sky-dark: #6e8898;
 
-  --color-lavender: #c3aed6;
-  --color-lavender-light: #d9cce8;
-  --color-lavender-dark: #a98fc4;
+  --color-lavender: #a0a0b4;
+  --color-lavender-light: #b8b8c8;
+  --color-lavender-dark: #88889a;
 
-  --color-butter: #ffeaa7;
-  --color-butter-light: #fff4cc;
-  --color-butter-dark: #fddc6d;
+  --color-butter: #c0bca8;
+  --color-butter-light: #d4d0c0;
+  --color-butter-dark: #a8a490;
 
-  --color-coral: #ff9a8b;
-  --color-cream: #fef9f3;
-  --color-white: #ffffff;
+  --color-coral: #a89080;
+  --color-cream: #edebe7;
+  --color-white: #f8f7f5;
 
-  /* App-specific colors */
-  --app-inbox: #a8d8ea;
-  --app-chat: #ffb7b2;
-  --app-files: #ffeaa7;
-  --app-terminal: #c3aed6;
-  --app-notes: #ffeaa7;
-  --app-calendar: #a8e6cf;
-  --app-settings: #e8e8e8;
-  --app-help: #c3aed6;
+  /* App-specific colors — all within approved gray spectrum */
+  --app-inbox: #8fa8b8;
+  --app-chat: #b8a898;
+  --app-files: #c0bca8;
+  --app-terminal: #7a8a8a;
+  --app-notes: #c0bca8;
+  --app-calendar: #9ab0b0;
+  --app-settings: #d4d2ce;
+  --app-help: #a0a0b4;
 
   /* UI Colors */
-  --bg-primary: #fef9f3;
-  --bg-secondary: #ffffff;
-  --text-primary: #5a5a5a;
-  --text-secondary: #888888;
-  --text-dark: #444444;
-  --shadow-color: rgba(0, 0, 0, 0.1);
-  --shadow-color-strong: rgba(0, 0, 0, 0.15);
+  --bg-primary: #eceae6;
+  --bg-secondary: #f4f3f0;
+  --text-primary: #3a3a3a;
+  --text-secondary: #7a7a7a;
+  --text-dark: #1a1a1a;
+  --shadow-color: rgba(0, 0, 0, 0.08);
+  --shadow-color-strong: rgba(0, 0, 0, 0.12);
 
   /* Window styling */
-  --window-radius: 16px;
+  --window-radius: 8px;
   --button-radius: 50%;
-  --icon-radius: 12px;
+  --icon-radius: 6px;
 }
 
 * {

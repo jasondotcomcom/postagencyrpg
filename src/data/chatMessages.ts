@@ -1,7 +1,7 @@
 import type { ChatMessage, ChatCampaignEvent, ChatEventContext, MessageTemplate, MoraleLevel } from '../types/chat';
 
 // ─── Seed Messages ────────────────────────────────────────────────────────────
-// These appear when the app first loads to make chat feel lived-in
+// These appear when the app first loads to make the Approved Communication Portal feel lived-in
 
 export function getInitialMessages(): ChatMessage[] {
   const now = Date.now();
@@ -11,8 +11,8 @@ export function getInitialMessages(): ChatMessage[] {
     {
       id: 'seed-1',
       channel: 'general',
-      authorId: 'pm',
-      text: 'Morning everyone! New week, new campaigns. Check the inbox for incoming briefs.',
+      authorId: 'hr',
+      text: 'Reminder: Q3 mandatory training modules are due by Friday. This includes all four modules. Module D (Bloodborne Pathogens) is non-negotiable. This has been documented.',
       timestamp: now - 7200000,
       reactions: [],
       isRead: true,
@@ -20,8 +20,8 @@ export function getInitialMessages(): ChatMessage[] {
     {
       id: 'seed-2',
       channel: 'general',
-      authorId: 'suit',
-      text: "Heard we might have a new brief coming in. Fingers crossed it's a fun one.",
+      authorId: 'vance',
+      text: 'Good morning team. Let\'s leverage today\'s momentum to ideate around our core deliverables and move the needle on Q3 outcomes. I\'m blocked until 3pm but drop me a ping if anything needs to be surfaced.',
       timestamp: now - 6800000,
       reactions: [],
       isRead: true,
@@ -29,77 +29,59 @@ export function getInitialMessages(): ChatMessage[] {
     {
       id: 'seed-3',
       channel: 'general',
-      authorId: 'copywriter',
-      text: "Every brief is fun if you squint hard enough \u2014 like that time we compared insurance to a heist movie.",
+      authorId: 'pm',
+      text: 'New briefs are in the inbox. I\'ll have scoped timelines by EOD. Please do not start anything until the scope is confirmed and Vance has signed off.',
       timestamp: now - 6500000,
-      reactions: [{ emoji: '\uD83D\uDE02', count: 2 }],
+      reactions: [],
       isRead: true,
     },
-
-    // #creative
     {
       id: 'seed-4',
-      channel: 'creative',
-      authorId: 'art-director',
-      text: 'Reorganized the asset library. If anyone touches my folder structure I will know.',
-      timestamp: now - 5400000,
+      channel: 'general',
+      authorId: 'copywriter',
+      text: 'Got it.',
+      timestamp: now - 6300000,
       reactions: [],
       isRead: true,
     },
     {
       id: 'seed-5',
-      channel: 'creative',
-      authorId: 'strategist',
-      text: "Sharing a trend report I put together. TL;DR: short-form is still king, but long-form is having a moment with Gen Z.",
-      timestamp: now - 5000000,
-      reactions: [{ emoji: '\uD83D\uDCCA', count: 1 }],
-      isRead: true,
-    },
-    {
-      id: 'seed-6',
-      channel: 'creative',
-      authorId: 'copywriter',
-      text: "Anyone else feel like every brief lately wants \"authentic but aspirational\"? That's just... all of advertising.",
-      timestamp: now - 4500000,
+      channel: 'general',
+      authorId: 'hr',
+      text: 'Also: the new EX-22B expense form is live in OmniTrack™. EX-22A is no longer accepted. I have sent a calendar invite for the 10-minute walkthrough on Thursday.',
+      timestamp: now - 5800000,
       reactions: [],
       isRead: true,
     },
 
-    // #random
+    // #creative — mostly dead
     {
-      id: 'seed-7',
-      channel: 'random',
-      authorId: 'technologist',
-      text: "Built a Slack bot over the weekend that ranks our lunch orders by caloric density. You're welcome.",
-      timestamp: now - 4200000,
-      reactions: [{ emoji: '\uD83D\uDE02', count: 3 }],
+      id: 'seed-6',
+      channel: 'creative',
+      authorId: 'copywriter',
+      text: 'Sharing a reference for the brand refresh. Thought it might be useful.',
+      timestamp: now - 48 * 3600000,
+      reactions: [],
       isRead: true,
     },
+    {
+      id: 'seed-7',
+      channel: 'creative',
+      authorId: 'strategist',
+      text: 'Thanks.',
+      timestamp: now - 47 * 3600000,
+      reactions: [],
+      isRead: true,
+    },
+
+    // #random — one message, no replies
     {
       id: 'seed-8',
       channel: 'random',
-      authorId: 'media',
-      text: 'the algorithm giveth and the algorithm taketh away',
-      timestamp: now - 3600000,
-      reactions: [],
-      isRead: true,
-    },
-    {
-      id: 'seed-9',
-      channel: 'random',
-      authorId: 'pm',
-      text: "Reminder: Friday standups are mandatory. Yes, even you, Jamie.",
-      timestamp: now - 3000000,
-      reactions: [],
-      isRead: true,
-    },
-    {
-      id: 'seed-10',
-      channel: 'random',
       authorId: 'copywriter',
-      text: 'I will attend when the meeting has a three-act structure',
-      timestamp: now - 2800000,
-      reactions: [{ emoji: '\uD83D\uDE02', count: 1 }],
+      text: '🦆',
+      timestamp: now - 72 * 3600000,
+      reactions: [],
       isRead: true,
     },
   ];
@@ -138,31 +120,25 @@ export function getCampaignEventMessages(
 
 function getBriefAcceptedMessages(ctx: ChatEventContext, morale: MoraleLevel): MessageTemplate[] {
   const pmText = {
-    high: `New brief just dropped! \u201C${ctx.campaignName}\u201D for ${ctx.clientName}. Let\u2019s gooo \uD83D\uDE80`,
-    medium: `New brief just dropped! \u201C${ctx.campaignName}\u201D for ${ctx.clientName}. Assigning a team now.`,
-    low: `Another brief in. \u201C${ctx.campaignName}\u201D for ${ctx.clientName}. I\u2019ll get a team sorted.`,
+    high: `Brief accepted: "${ctx.campaignName}" for ${ctx.clientName}. Scoping now. Timelines by EOD.`,
+    medium: `Brief accepted: "${ctx.campaignName}" for ${ctx.clientName}. Scoping now. Timelines by EOD.`,
+    low: `Brief is in. "${ctx.campaignName}" for ${ctx.clientName}. Starting the approval routing.`,
   };
   const suitText = {
-    high: `${ctx.clientName} \u2014 good vibes from this one. Let\u2019s crush it!`,
-    medium: `${ctx.clientName} \u2014 solid client. Let\u2019s make sure we nail the positioning.`,
-    low: `${ctx.clientName}. Let\u2019s just make sure we\u2019re aligned before we start.`,
+    high: `${ctx.clientName} — good client. Let's make sure we're aligned on what they actually want before we do anything.`,
+    medium: `${ctx.clientName}. I'll schedule a pre-brief alignment call. Don't start concepting until after.`,
+    low: `${ctx.clientName}. Looping in Vance before we go too far.`,
   };
-  const copywriterText = {
-    high: `Already have three tagline ideas and I haven\u2019t even read the brief yet. This is definitely a gift.`,
-    medium: `Already have three tagline ideas and I haven\u2019t even read the brief yet. This is either a gift or a problem.`,
-    low: `Cool. I\u2019ll... start thinking about headlines after this coffee.`,
-  };
-  const techText = {
-    high: `What if we built an app for this one? I\u2019m already sketching something out \uD83D\uDCBB`,
-    medium: `What if we built an app for this one? Just throwing it out there.`,
-    low: `I can take a look at the tech angle if needed.`,
+  const vanceText = {
+    high: `Excellent. Let's leverage this brief to demonstrate our strategic value. I'll set up a kickoff framework.`,
+    medium: `Good. I'd like to see a strategic positioning brief before concepting begins. Happy to circle back on this.`,
+    low: `I'll need to see the scope before we allocate resources. Taylor, can you align on capacity?`,
   };
 
   return [
     { channel: 'general', authorId: 'pm', text: pmText[morale] },
     { channel: 'general', authorId: 'suit', text: suitText[morale] },
-    { channel: 'general', authorId: 'copywriter', text: copywriterText[morale] },
-    { channel: 'general', authorId: 'technologist', text: techText[morale], reactions: morale === 'high' ? [{ emoji: '\uD83D\uDE02', count: 2 }] : [] },
+    { channel: 'general', authorId: 'vance', text: vanceText[morale] },
   ];
 }
 
@@ -170,24 +146,18 @@ function getBriefAcceptedMessages(ctx: ChatEventContext, morale: MoraleLevel): M
 
 function getConceptingMessages(ctx: ChatEventContext, morale: MoraleLevel): MessageTemplate[] {
   const strategistText = {
-    high: `Pulling audience data for \u201C${ctx.campaignName}\u201D. The cultural tension here is \u2728 *chef\u2019s kiss* \u2728`,
-    medium: `Pulling audience data for \u201C${ctx.campaignName}\u201D. The cultural tension here is interesting.`,
-    low: `Looking at the audience data for \u201C${ctx.campaignName}\u201D. Need to find an angle that works.`,
-  };
-  const artDirectorText = {
-    high: `Mood board is FLOWING. The visual language practically wrote itself.`,
-    medium: `I have a mood board forming. The visual language needs to feel effortless but intentional.`,
-    low: `Working on visuals. Need some quiet time with this one.`,
+    high: `Pulling benchmarks and competitive landscape for "${ctx.campaignName}". There's actually an interesting angle here.`,
+    medium: `Pulling benchmarks for "${ctx.campaignName}". Will share positioning options with the team.`,
+    low: `Running the benchmarks. Will have a 2x2 by end of day.`,
   };
   const copywriterText = {
-    high: `This brief reminds me of that scene in Mad Men where Don just... nails it. That\u2019s us right now.`,
-    medium: `This brief reminds me of that scene in Mad Men where \u2014 actually never mind, I\u2019ll save it for the presentation.`,
-    low: `Thinking through angles. Will have something soon.`,
+    high: `Working through the messaging architecture. There's something here — not sure what yet, but something.`,
+    medium: `Working on the messaging. I have three directions. I like one of them. Vance will probably like a different one.`,
+    low: `On the copy. Will have options.`,
   };
 
   return [
     { channel: 'creative', authorId: 'strategist', text: strategistText[morale] },
-    { channel: 'creative', authorId: 'art-director', text: artDirectorText[morale] },
     { channel: 'creative', authorId: 'copywriter', text: copywriterText[morale] },
   ];
 }
@@ -196,57 +166,51 @@ function getConceptingMessages(ctx: ChatEventContext, morale: MoraleLevel): Mess
 
 function getConceptChosenMessages(ctx: ChatEventContext, morale: MoraleLevel): MessageTemplate[] {
   const pmText = {
-    high: `Direction locked for \u201C${ctx.campaignName}\u201D! Moving into production \u2014 timelines coming your way! \uD83D\uDCCB`,
-    medium: `Direction locked for \u201C${ctx.campaignName}\u201D. Moving into production \u2014 I\u2019ll have timelines out by EOD.`,
-    low: `Direction set for \u201C${ctx.campaignName}\u201D. Let\u2019s get through production. Timelines incoming.`,
+    high: `Direction locked for "${ctx.campaignName}". Moving to production phase — approval routing starts now.`,
+    medium: `Direction confirmed for "${ctx.campaignName}". Routing for Vance sign-off before we proceed.`,
+    low: `Direction set. Waiting on Vance sign-off. I've sent the calendar invite.`,
   };
   const suitText = {
-    high: `This direction is money. Client\u2019s going to flip. \uD83D\uDD25`,
-    medium: `Love this direction. The client is going to get it immediately.`,
-    low: `Direction works. Let\u2019s see how it comes together.`,
+    high: `This direction works. I can sell this. Let's make sure Legal sees it before we go too far.`,
+    medium: `Good direction. I'll prepare the client-facing framing. Taylor, what's the timeline to Legal review?`,
+    low: `Direction is fine. Legal turnaround is 5-7 days. Factor that in.`,
   };
-  const artDirectorText = {
-    high: `Yes. This is the one. Time to make something beautiful.`,
-    medium: `Good pick. Time to make it real.`,
-    low: `Got it. Heads down.`,
-  };
-  const mediaText = {
-    high: `Already thinking about where this lives. This concept TikToks itself! \uD83D\uDCF1`,
-    medium: `Already thinking about where this lives. This concept translates well to social.`,
-    low: `I\u2019ll figure out the channel mix.`,
+  const vanceText = {
+    high: `I appreciate the strategic alignment here. This direction leverages our core strengths. Moving forward.`,
+    medium: `This is solid. I want to see the Legal-cleared version before we finalize. Keep me in the loop.`,
+    low: `Approved, pending Legal. I've flagged this as a P2. Don't let it slip.`,
   };
 
   return [
     { channel: 'general', authorId: 'pm', text: pmText[morale] },
     { channel: 'general', authorId: 'suit', text: suitText[morale] },
-    { channel: 'general', authorId: 'art-director', text: artDirectorText[morale] },
-    { channel: 'general', authorId: 'media', text: mediaText[morale] },
+    { channel: 'general', authorId: 'vance', text: vanceText[morale] },
   ];
 }
 
 // ─── DELIVERABLES_GENERATING ──────────────────────────────────────────────────
 
 function getDeliverablesGeneratingMessages(ctx: ChatEventContext, morale: MoraleLevel): MessageTemplate[] {
-  const artDirectorText = {
-    high: `Heads down on \u201C${ctx.campaignName}\u201D deliverables. In the zone \uD83C\uDFA8 Do not disturb unless there\u2019s champagne.`,
-    medium: `Heads down on \u201C${ctx.campaignName}\u201D deliverables. Do not disturb unless there\u2019s coffee.`,
-    low: `Working on \u201C${ctx.campaignName}\u201D deliverables. Going to need some focus time.`,
-  };
   const copywriterText = {
-    high: `Draft 14 and every single one is a banger. I can\u2019t choose. This is agony and ecstasy.`,
-    medium: `Draft 14. Or 15. I lost count somewhere around the second em dash.`,
-    low: `Working through the copy. Almost there.`,
+    high: `Working through the deliverables for "${ctx.campaignName}". This one might actually be good.`,
+    medium: `Working through the deliverables. On track for the submission window.`,
+    low: `Heads down on deliverables. Almost done.`,
+  };
+  const contractorText = {
+    high: `Attached please find the design assets per the attached brief. Please advise on revisions.`,
+    medium: `Attached please find the design assets per the attached brief. Please advise on revisions.`,
+    low: `Attached please find the design assets per the attached brief. Please advise on revisions.`,
   };
   const pmText = {
-    high: `Team is ON FIRE right now. \u201C${ctx.campaignName}\u201D is looking incredible \uD83D\uDD25`,
-    medium: `Team is in the zone on \u201C${ctx.campaignName}\u201D. Progress looking good so far.`,
-    low: `Production underway for \u201C${ctx.campaignName}\u201D. Tracking to deadline.`,
+    high: `Production is moving. "${ctx.campaignName}" is on track. Routing for approval in 48 hours.`,
+    medium: `Production underway for "${ctx.campaignName}". Tracking to deadline. I\'ll send a status update tomorrow.`,
+    low: `Production in progress. Tracking. No issues to surface yet.`,
   };
 
   return [
-    { channel: 'creative', authorId: 'art-director', text: artDirectorText[morale] },
     { channel: 'creative', authorId: 'copywriter', text: copywriterText[morale] },
-    { channel: 'general', authorId: 'pm', text: pmText[morale], reactions: morale === 'high' ? [{ emoji: '\uD83D\uDD25', count: 3 }] : [] },
+    { channel: 'creative', authorId: 'contractor', text: contractorText[morale] },
+    { channel: 'general', authorId: 'pm', text: pmText[morale] },
   ];
 }
 
@@ -259,37 +223,29 @@ function getCampaignScoredWellMessages(ctx: ChatEventContext, morale: MoraleLeve
     {
       channel: 'general',
       authorId: 'suit',
-      text: `${ctx.clientName} LOVED it. \u201C${ctx.campaignName}\u201D scored ${score}. We should celebrate. \uD83C\uDF89`,
-      reactions: [{ emoji: '\uD83C\uDF89', count: 5 }],
+      text: `Stakeholder feedback on "${ctx.campaignName}" came back strong — ${score} out of 100. Good outcome.`,
+      reactions: [{ emoji: '✓', count: 3 }],
     },
     {
       channel: 'general',
-      authorId: 'copywriter',
-      text: morale === 'low'
-        ? `Wait, really? That\u2019s... actually really good. Maybe we\u2019re better than we think.`
-        : `I KNEW the manifesto would land. This is our Citizen Kane moment \u2014 I\u2019m only slightly exaggerating.`,
-    },
-    {
-      channel: 'general',
-      authorId: 'art-director',
-      text: morale === 'low'
-        ? `Good. We needed that.`
-        : `We did good work. The visual direction was right.`,
+      authorId: 'vance',
+      text: morale === 'high'
+        ? `This is excellent. I\'d like to use this as a case study in the capabilities deck. Let\'s document the learnings.`
+        : `Good result. I\'ll note this in the performance documentation. Let\'s see if we can replicate the framework.`,
     },
     {
       channel: 'general',
       authorId: 'pm',
-      text: morale === 'low'
-        ? `Team, that\u2019s a big win. We needed this one. Really proud of everyone. \uD83C\uDFC6`
-        : `Team, incredible work. Adding this one to the trophy wall. \uD83C\uDFC6`,
-      reactions: [{ emoji: '\uD83D\uDCAA', count: 4 }],
+      text: morale === 'high'
+        ? `Great work team. "${ctx.campaignName}" is a strong deliverable. Adding to the archive.`
+        : `Good outcome. Archiving the assets. Routing the post-mortem for sign-off.`,
     },
     {
       channel: 'general',
-      authorId: 'technologist',
-      text: morale === 'low'
-        ? `See? Still got it. Also I still think we should build that dashboard.`
-        : `We should build a dashboard to track our win rate. Just saying. \uD83D\uDCBB`,
+      authorId: 'copywriter',
+      text: morale === 'high'
+        ? `The work was actually good on this one. I\'m going to let myself feel that for a moment.`
+        : `Good. It was good work.`,
     },
   ];
 }
@@ -304,78 +260,77 @@ function getCampaignScoredPoorlyMessages(ctx: ChatEventContext, morale: MoraleLe
       channel: 'general',
       authorId: 'suit',
       text: morale === 'high'
-        ? `Got the scores back for \u201C${ctx.campaignName}\u201D. ${score} out of 100. Not what we expected, but we\u2019ll learn from it.`
-        : `Got the scores back for \u201C${ctx.campaignName}\u201D. ${score} out of 100. Not our best showing.`,
+        ? `Feedback on "${ctx.campaignName}" — ${score} out of 100. Not what we hoped for, but within acceptable parameters.`
+        : `Scores back for "${ctx.campaignName}". ${score}. I\'ll schedule a debrief.`,
+    },
+    {
+      channel: 'general',
+      authorId: 'vance',
+      text: morale === 'high'
+        ? `This is a learning opportunity. Let\'s regroup and identify the strategic gaps. I\'ll send a framework.`
+        : `I\'d like to understand what happened here. Taylor, can you schedule a post-mortem?`,
     },
     {
       channel: 'general',
       authorId: 'pm',
       text: morale === 'high'
-        ? `Every campaign teaches us something. Let\u2019s debrief and come back stronger.`
-        : `Let\u2019s regroup and figure out what we can learn from this one. We\u2019ll get the next one.`,
+        ? `Let\'s do a structured debrief. I\'ll send an agenda.`
+        : `Scheduling the post-mortem. I\'ll have an agenda out by tomorrow.`,
     },
     {
       channel: 'general',
-      authorId: 'copywriter',
-      text: morale === 'high'
-        ? `Sometimes the work is good and the fit isn\u2019t there. Happens to the best of us.`
-        : `Tough one. Going to sit with this for a bit.`,
+      authorId: 'hr',
+      text: 'A reminder that performance documentation is updated quarterly. If you have concerns about workload or scope, the HR portal is available.',
     },
-    {
-      channel: 'general',
-      authorId: 'strategist',
-      text: morale === 'high'
-        ? `I want to dig into the audience data. I think the positioning was close but not quite there.`
-        : `I think we misread the room on positioning. Need to dig into the data.`,
-    },
-  ];
-}
-
-// ─── NEW_BRIEF_ARRIVED ────────────────────────────────────────────────────────
-
-// ─── AWARD_WON ────────────────────────────────────────────────────────────────
-
-function getAwardWonMessages(ctx: ChatEventContext, morale: MoraleLevel): MessageTemplate[] {
-  const award = ctx.awardName ?? 'an award';
-  const suitText = {
-    high: `🏆 Just heard — "${ctx.campaignName}" won ${award}! This is HUGE for us. Drinks are on the agency tonight.`,
-    medium: `🏆 We just won ${award} for "${ctx.campaignName}"! Really great news for the team.`,
-    low: `🏆 We won ${award} for "${ctx.campaignName}". Wasn't expecting it, but I'll take it.`,
-  };
-  const pmText = {
-    high: `Adding it to the wall RIGHT NOW. This one's for the whole team. 🙌`,
-    medium: `Updating the credentials deck. Nice work everyone.`,
-    low: `Good. We needed a win. Updating the portfolio.`,
-  };
-  const copywriterText = {
-    high: `I ALWAYS knew that concept was award-worthy. I said it. Someone please confirm I said it.`,
-    medium: `Really proud of the writing on that one. This is what it's all about.`,
-    low: `Huh. Maybe the work was better than I thought.`,
-  };
-
-  return [
-    { channel: 'general', authorId: 'suit', text: suitText[morale], reactions: [{ emoji: '🏆', count: 5 }] },
-    { channel: 'general', authorId: 'pm', text: pmText[morale], reactions: morale === 'high' ? [{ emoji: '🙌', count: 4 }] : [] },
-    { channel: 'general', authorId: 'copywriter', text: copywriterText[morale] },
   ];
 }
 
 // ─── NEW_BRIEF_ARRIVED ────────────────────────────────────────────────────────
 
 function getNewBriefArrivedMessages(ctx: ChatEventContext, morale: MoraleLevel): MessageTemplate[] {
-  const suitText = {
-    high: `New client just reached out — ${ctx.clientName}. Check the inbox, this one looks like a fun challenge! 📧`,
-    medium: `New brief just came in from ${ctx.clientName}. Worth a look when you get a moment.`,
-    low: `Got a new inquiry from ${ctx.clientName} in the inbox. I'll do some background research before we decide.`,
-  };
   const pmText = {
-    high: `Oh nice, ${ctx.clientName}! Already intrigued. Let's see if it's a good fit. 👀`,
-    medium: `I'll flag it once I've had a look at the scope.`,
-    low: `On it. Will assess before we commit.`,
+    high: `New request in from ${ctx.clientName}. Check the inbox when you have a moment.`,
+    medium: `New project request from ${ctx.clientName} in the queue. I\'ll scope it before we commit capacity.`,
+    low: `${ctx.clientName} request is in the inbox. Holding off on resource allocation until we have scope clarity.`,
+  };
+  const vanceText = {
+    high: `I\'ll review the brief and identify strategic synergies before we kick off. Let\'s circle back Thursday.`,
+    medium: `Good. I\'d like to see the brief before we scope. Can someone ping me when it\'s ready to review?`,
+    low: `Is this within our current approved capacity? Taylor, can you check the Q3 utilization before we accept?`,
   };
 
   return [
-    { channel: 'general', authorId: 'suit', text: suitText[morale] },
     { channel: 'general', authorId: 'pm', text: pmText[morale] },
+    { channel: 'general', authorId: 'vance', text: vanceText[morale] },
+  ];
+}
+
+// ─── AWARD_WON ────────────────────────────────────────────────────────────────
+
+function getAwardWonMessages(ctx: ChatEventContext, morale: MoraleLevel): MessageTemplate[] {
+  const award = ctx.awardName ?? 'a recognition';
+  const suitText = {
+    high: `"${ctx.campaignName}" received the ${award}. This goes in the credentials deck.`,
+    medium: `${award} for "${ctx.campaignName}". Good for the portfolio.`,
+    low: `We received the ${award} for "${ctx.campaignName}". I\'ll update the deck.`,
+  };
+  const vanceText = {
+    high: `Excellent. I\'d like to feature this in the next investor update and the Q4 All-Hands deck. Can someone flag this for Comms?`,
+    medium: `Good recognition. Let\'s make sure we document the learnings. I\'ll reference this at the next leadership sync.`,
+    low: `Noted. I\'ll include it in the performance review documentation. Well done.`,
+  };
+  const hrText = `Congratulations to the team on this recognition. This will be noted in Q3 performance documentation. Per People Policy 4.1, award recognitions may be referenced in annual performance reviews.`;
+
+  return [
+    { channel: 'general', authorId: 'suit', text: suitText[morale] },
+    { channel: 'general', authorId: 'vance', text: vanceText[morale] },
+    { channel: 'general', authorId: 'hr', text: hrText },
+    {
+      channel: 'general',
+      authorId: 'copywriter',
+      text: morale === 'high'
+        ? `We won something. I\'m choosing to let that matter.`
+        : `Cool.`,
+    },
   ];
 }

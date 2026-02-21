@@ -40,12 +40,15 @@ function renderMarkdown(text: string): string {
 export default function EmailDetail({ email }: EmailDetailProps) {
   const { toggleStar, deleteEmail, acceptBrief, markRead, markUnread } = useEmailContext();
   const { addNotification, openWindow, focusWindow, restoreWindow, windows } = useWindowContext();
-  const { createCampaign } = useCampaignContext();
+  const { createCampaign, campaigns } = useCampaignContext();
   const { addReputation, subtractReputation, state: repState } = useReputationContext();
   const { triggerCampaignEvent } = useChatContext();
   const { handleAcquisitionAccept, handleAcquisitionReject, handleHostileTakeoverAccept, acquisitionState } = useEndingContext();
   const [reputationApplied, setReputationApplied] = useState(false);
   const [acquisitionActioned, setAcquisitionActioned] = useState(false);
+
+  const briefAlreadyAccepted = email.type === 'campaign_brief'
+    && campaigns.some(c => c.briefId === email.id);
 
   // Apply reputation bonus when email is first read
   useEffect(() => {
@@ -305,12 +308,18 @@ export default function EmailDetail({ email }: EmailDetailProps) {
       {/* Footer with Actions */}
       {email.type === 'campaign_brief' && (
         <div className={styles.footer}>
-          <button className={styles.secondaryButton}>
+          <button className={styles.secondaryButton} disabled title="Coming soon">
             📤 Forward
           </button>
-          <button className={styles.primaryButton} onClick={handleAcceptBrief}>
-            ✅ Accept Brief
-          </button>
+          {briefAlreadyAccepted ? (
+            <button className={styles.secondaryButton} disabled>
+              ✓ Brief Accepted
+            </button>
+          ) : (
+            <button className={styles.primaryButton} onClick={handleAcceptBrief}>
+              ✅ Accept Brief
+            </button>
+          )}
         </div>
       )}
 

@@ -17,19 +17,15 @@ export default function Taskbar() {
       <button className={styles.startButton}>
         <div className={styles.startLogo}>
           <svg viewBox="0 0 24 24" fill="none">
-            {/* Cute star/sparkle logo */}
-            <circle cx="12" cy="12" r="10" fill="url(#startGradient)"/>
-            <path d="M12 6 L13.5 10.5 L18 10.5 L14.5 13.5 L16 18 L12 15 L8 18 L9.5 13.5 L6 10.5 L10.5 10.5 Z" fill="#fff"/>
-            <defs>
-              <linearGradient id="startGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#a8e6cf"/>
-                <stop offset="50%" stopColor="#a8d8ea"/>
-                <stop offset="100%" stopColor="#c3aed6"/>
-              </linearGradient>
-            </defs>
+            {/* OmniPubDent Corporate Logo Mark */}
+            <rect x="2" y="2" width="20" height="20" rx="2" fill="#4a5568"/>
+            <rect x="5" y="5" width="14" height="2" fill="#9ab0b0"/>
+            <rect x="5" y="9" width="10" height="2" fill="#7a8a8a"/>
+            <rect x="5" y="13" width="12" height="2" fill="#7a8a8a"/>
+            <rect x="5" y="17" width="8" height="2" fill="#5a6a6a"/>
           </svg>
         </div>
-        <span>Agency</span>
+        <span>OmniPubDent</span>
       </button>
 
       <div className={styles.windowButtons}>

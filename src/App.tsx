@@ -123,23 +123,29 @@ function AppContent() {
       const bonusRep   = 10 + legacy.totalAwards * 2;
       timers.push(setTimeout(() => {
         addNotification(
-          `Welcome back, ${playerName} — Run #${runNum}`,
-          'The agency is yours again. Let\'s see if you can top last time.'
+          `Contract Renewal — ${playerName} (Run #${runNum})`,
+          'HR has processed your rehire. Your badge still works. Pat has been notified.'
         );
       }, 500));
       timers.push(setTimeout(() => {
         addNotification(
-          '🎁 Legacy Bonus Applied',
-          `Starting with $${bonusFunds.toLocaleString()} budget and ${bonusRep} reputation from your previous run.`
+          'Carryover Credits Applied',
+          `Prior performance: $${bonusFunds.toLocaleString()} starting budget, ${bonusRep} rep. Documented in your personnel file.`
         );
       }, 3500));
     } else {
       timers.push(setTimeout(() => {
         addNotification(
-          `Hey ${playerName} — welcome to the agency`,
-          'The team is here and ready to go. Check your inbox for incoming briefs.'
+          `Onboarding Complete — ${playerName}`,
+          'Welcome to OmniPubDent Creative Services. Your mandatory training modules are due by Friday.'
         );
       }, 500));
+      timers.push(setTimeout(() => {
+        addNotification(
+          'Action Required: Synergy Hub™',
+          'You have 2 unread project requests in the Synergy Hub. Please review and confirm capacity with Taylor.'
+        );
+      }, 3000));
     }
 
     return () => timers.forEach(clearTimeout);
@@ -160,8 +166,8 @@ function AppContent() {
       setTimeout(() => {
         addEmail(entry.buildEmail());
         addNotification(
-          '📧 New Brief!',
-          `${entry.clientName} wants to work with your agency. Check your inbox.`,
+          '📋 New Request',
+          `${entry.clientName} project request in the Synergy Hub™. Please scope and confirm by EOD.`,
         );
         triggerCampaignEvent('NEW_BRIEF_ARRIVED', { clientName: entry.clientName });
       }, delay);

@@ -1,8 +1,9 @@
-// ─── Award Definitions ────────────────────────────────────────────────────────
+// ─── OmniPubDent Internal Recognition Program ─────────────────────────────────
+// Awards require Performance Review Committee approval (3–4 weeks processing time)
 
 export interface AwardDef {
   id: string;
-  name: string;       // Display name, e.g. "🌟 Cannes Shortlist"
+  name: string;       // Display name
   description: string;
   repBonus: number;
   minScore: number;
@@ -11,25 +12,25 @@ export interface AwardDef {
 
 export const AWARD_DEFS: AwardDef[] = [
   {
-    id: 'cannes',
-    name: '🌟 Cannes Shortlist',
-    description: 'Work shortlisted for the Cannes Lions. The industry is watching.',
-    repBonus: 8,
-    minScore: 95,
+    id: 'stakeholder_alignment',
+    name: '🏆 Stakeholder Alignment Award',
+    description: 'All seven approval layers signed off without major revisions. A statistical anomaly.',
+    repBonus: 6,
+    minScore: 92,
   },
   {
-    id: 'clients_choice',
-    name: '🏆 Client\'s Choice',
-    description: 'Exceptional client satisfaction. They told everyone about it.',
-    repBonus: 5,
-    minScore: 90,
+    id: 'internal_excellence',
+    name: '🏅 Q-Series Excellence Certificate',
+    description: 'Recognized by the Performance Review Committee. Certificate printed on cardstock.',
+    repBonus: 4,
+    minScore: 82,
   },
   {
-    id: 'above_beyond',
-    name: '📈 Above & Beyond',
-    description: 'Delivered outstanding work under budget. A rare combination.',
-    repBonus: 3,
-    minScore: 85,
+    id: 'on_budget',
+    name: '📊 Budget Compliance Commendation',
+    description: 'Delivered within approved parameters AND on schedule. HR will note this.',
+    repBonus: 2,
+    minScore: 70,
     requiresUnderBudget: true,
   },
 ];

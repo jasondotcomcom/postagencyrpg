@@ -15,7 +15,7 @@ export function useWindowDrag({
   isMaximized,
   onPositionChange,
   onFocus,
-  taskbarHeight = 40,
+  taskbarHeight = 56,
 }: UseWindowDragOptions) {
   const isDragging = useRef(false);
   const dragOffset = useRef({ x: 0, y: 0 });

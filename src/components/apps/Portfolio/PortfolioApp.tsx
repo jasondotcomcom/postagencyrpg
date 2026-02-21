@@ -426,7 +426,7 @@ export default function PortfolioApp(): React.ReactElement {
     return b.completedAt - a.completedAt; // newest
   });
 
-  const headerTitle = playerName ? `${playerName}'s Portfolio` : 'Portfolio';
+  const headerTitle = playerName ? `${playerName} — Deliverables Archive` : 'Deliverables Archive';
 
   return (
     <div className={styles.app}>

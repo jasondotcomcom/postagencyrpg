@@ -10,15 +10,15 @@ import ContextMenu from './ContextMenu';
 import styles from './Desktop.module.css';
 
 const defaultIcons: DesktopIconType[] = [
-  { id: 'icon-inbox', label: 'Inbox', icon: 'inbox', appId: 'inbox' },
-  { id: 'icon-projects', label: 'Projects', icon: 'projects', appId: 'projects' },
-  { id: 'icon-portfolio', label: 'Portfolio', icon: 'portfolio', appId: 'portfolio' },
-  { id: 'icon-chat', label: 'Chat', icon: 'chat', appId: 'chat' },
-  { id: 'icon-terminal', label: 'Terminal', icon: 'terminal', appId: 'terminal' },
-  { id: 'icon-notes', label: 'Notes', icon: 'notes', appId: 'notes' },
-  { id: 'icon-calendar', label: 'Calendar', icon: 'calendar', appId: 'calendar' },
-  { id: 'icon-settings', label: 'Settings', icon: 'settings', appId: 'settings' },
-  { id: 'icon-help', label: 'Help', icon: 'help', appId: 'help' },
+  { id: 'icon-inbox', label: 'Synergy Hub™', icon: 'inbox', appId: 'inbox' },
+  { id: 'icon-projects', label: 'Workflow Center', icon: 'projects', appId: 'projects' },
+  { id: 'icon-portfolio', label: 'Deliverables Archive', icon: 'portfolio', appId: 'portfolio' },
+  { id: 'icon-chat', label: 'Comm. Portal', icon: 'chat', appId: 'chat' },
+  { id: 'icon-terminal', label: 'IT Terminal', icon: 'terminal', appId: 'terminal' },
+  { id: 'icon-notes', label: 'Meeting Notes', icon: 'notes', appId: 'notes' },
+  { id: 'icon-calendar', label: 'Synergy Calendar', icon: 'calendar', appId: 'calendar' },
+  { id: 'icon-settings', label: 'Configuration', icon: 'settings', appId: 'settings' },
+  { id: 'icon-help', label: 'Policy Manual', icon: 'help', appId: 'help' },
 ];
 
 interface ContextMenuState {

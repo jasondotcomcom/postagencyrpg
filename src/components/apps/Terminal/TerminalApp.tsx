@@ -52,28 +52,56 @@ const KONAMI_LENGTH = 10;
 
 const BANNER_LINES: Array<[LineType, string]> = [
   ['info',   '╔══════════════════════════════════════════╗'],
-  ['info',   '║   ✨ Agency OS Terminal  v1.0            ║'],
-  ['info',   '║   Your command center for the hustle     ║'],
+  ['info',   '║  ⚠  OmniPubDent IT Systems Terminal     ║'],
+  ['info',   '║     ACCESS RESTRICTED                   ║'],
   ['info',   '╚══════════════════════════════════════════╝'],
   ['blank',  ''],
-  ['output', 'Type "help" to see available commands.'],
+  ['error',  'This terminal is restricted to authorized IT personnel.'],
+  ['output', 'Unauthorized access violates IT Policy 7.3.2 and may be subject to disciplinary action.'],
+  ['blank',  ''],
+  ['output', 'To request access, submit ticket IT-ACCESS via the OmniPubDent Help Portal.'],
+  ['output', 'Estimated response time: 3-5 business days.'],
+  ['blank',  ''],
+  ['output', 'Type "help" if you are authorized IT personnel.'],
   ['blank',  ''],
 ];
 
-const HELP_TEXT = `Available commands:
+const HELP_TEXT = `OmniPubDent IT Terminal — Authorized Commands Only
 
-  help                  Show this help
-  status                Show agency status
-  brief                 Show current campaign brief
-  team                  Show current campaign team
-  list                  List your saved tools
-  build [description]   Build a new AI tool
-  run [name]            Run a saved tool
-  delete [name]         Delete a saved tool
-  clear                 Clear the terminal
+  help                  Show this message (IT Policy 7.3.2)
+  status                Agency status (read-only)
+  brief                 Current project brief (read-only)
+  team                  Current team roster (read-only)
+  list                  List your approved tools
+  build [description]   Request tool build (subject to approval)
+  run [name]            Execute approved tool
+  delete [name]         Delete tool (requires manager sign-off)
+  clear                 Clear terminal output
 
-Tools built here appear in your campaign workspace.
-Hidden: Try classic cheat codes for surprises.`;
+All commands are logged per IT Policy 7.1.1.
+Unauthorized command attempts will be forwarded to Pat.`;
+
+const I_QUIT_LINES: Array<[LineType, string]> = [
+  ['blank',   ''],
+  ['success', '  . . .'],
+  ['blank',   ''],
+  ['success', '  You typed it.'],
+  ['blank',   ''],
+  ['output',  '  The cursor blinks. The Synergy Hub™ is open in another tab.'],
+  ['output',  '  Pat is drafting a memo about your departure.'],
+  ['output',  '  Vance has already begun the "offboarding circle-back."'],
+  ['blank',   ''],
+  ['output',  '  But outside — somewhere — there is a studio.'],
+  ['output',  '  There are people who make things that matter.'],
+  ['output',  '  They are arguing about fonts in a good way.'],
+  ['blank',   ''],
+  ['success', '  You remember what that felt like.'],
+  ['blank',   ''],
+  ['info',    '  ──────────────────────────────────────────'],
+  ['info',    '  The real agency is at agencyrpg.com'],
+  ['info',    '  ──────────────────────────────────────────'],
+  ['blank',   ''],
+];
 
 const KONAMI_REWARD = `
   ╔══════════════════════════════════════════════════╗
@@ -589,7 +617,7 @@ export default function TerminalApp(): React.ReactElement {
     if (!trimmed) return;
 
     // Echo input
-    addLine('input', `agency@os:~$ ${trimmed}`);
+    addLine('input', `omni@it-restricted:~$ ${trimmed}`);
 
     // History tracking
     setHistory(prev => [trimmed, ...prev.filter(h => h !== trimmed).slice(0, 48)]);
@@ -603,6 +631,15 @@ export default function TerminalApp(): React.ReactElement {
     const parts = trimmed.split(/\s+/);
     const command = parts[0].toLowerCase();
     const args = parts.slice(1).join(' ');
+
+    // ─── I QUIT — escape sequence ────────────────────────────────────────────
+    if (lower === 'i quit' || lower === 'quit' && trimmed === 'QUIT' || trimmed === 'I QUIT') {
+      addLines(I_QUIT_LINES);
+      setTimeout(() => {
+        window.open('https://agencyrpg.com', '_blank');
+      }, 3000);
+      return;
+    }
 
     // ─── Easter eggs & cheat codes ─────────────────────────────────────────
     // Checked FIRST — prevents the NL interpreter from misidentifying them
@@ -1739,7 +1776,7 @@ Human Resources
       </div>
 
       <form className={styles.inputRow} onSubmit={handleSubmit}>
-        <span className={styles.prompt}>agency@os:~$</span>
+        <span className={styles.prompt}>omni@it-restricted:~$</span>
         <input
           ref={inputRef}
           className={styles.input}
