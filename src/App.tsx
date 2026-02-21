@@ -134,16 +134,17 @@ function AppContent() {
         );
       }, 3500));
     } else {
+      const employeeId = localStorage.getItem('agencyrpg-employee-id') ?? '????';
       timers.push(setTimeout(() => {
         addNotification(
-          `Onboarding Complete — ${playerName}`,
-          'Welcome to OmniPubDent Creative Services. Your mandatory training modules are due by Friday.'
+          `Resource #${employeeId} successfully onboarded.`,
+          'Your designated workstation is now active. Report to your manager.'
         );
       }, 500));
       timers.push(setTimeout(() => {
         addNotification(
           'Action Required: Synergy Hub™',
-          'You have 2 unread project requests in the Synergy Hub. Please review and confirm capacity with Taylor.'
+          'You have 2 unread project briefs awaiting assignment. Please review and confirm capacity by EOD.'
         );
       }, 3000));
     }
