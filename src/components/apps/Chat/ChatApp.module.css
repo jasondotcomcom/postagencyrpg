@@ -13,3 +13,15 @@
   overflow: hidden;
   min-width: 0;
 }
+
+/* ─── Mobile Overrides ────────────────────────────────────────────────────── */
+@media (max-width: 767px) {
+  .chatApp {
+    border-radius: 0;
+  }
+
+  .mainPane {
+    flex: 1;
+    min-width: 0;
+  }
+}

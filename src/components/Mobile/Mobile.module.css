@@ -1,0 +1,688 @@
+/* ============================================================================
+   Mobile Shell Styles -- Employee Portal (Dystopian Corporate)
+   ============================================================================ */
+
+/* --- Phone Frame (root container) ---------------------------------------- */
+
+.phoneFrame {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: #000;
+  font-family: inherit;
+  color: #fff;
+  overflow: hidden;
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+/* --- Status Bar ---------------------------------------------------------- */
+
+.statusBar {
+  position: relative;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 44px;
+  padding: 0 16px;
+  padding-top: env(safe-area-inset-top, 0px);
+  background: rgba(15, 15, 30, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.85);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.statusBarLeft {
+  flex: 1;
+  text-align: left;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.statusBarCenter {
+  flex: 1;
+  text-align: center;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.6);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.statusBarRight {
+  flex: 1;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Screen Area --------------------------------------------------------- */
+
+.screenArea {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+/* --- Home Screen --------------------------------------------------------- */
+
+.homeScreen {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  padding: 24px 20px;
+  padding-bottom: 100px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px 12px;
+  align-content: start;
+  background: linear-gradient(170deg, #0a0a1a 0%, #121228 35%, #1a0f2e 65%, #0d0a1f 100%);
+}
+
+.homeScreen::-webkit-scrollbar {
+  display: none;
+}
+
+/* --- App Icon ------------------------------------------------------------ */
+
+.appIcon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.1s ease;
+}
+
+.appIcon:active {
+  transform: scale(0.9);
+}
+
+.appIcon:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.6);
+  outline-offset: 2px;
+  border-radius: 16px;
+}
+
+.appIconImageWrapper {
+  position: relative;
+  width: 60px;
+  height: 60px;
+}
+
+.appIconImage {
+  width: 60px;
+  height: 60px;
+  border-radius: 14px;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.appIconImage svg {
+  width: 40px;
+  height: 40px;
+}
+
+.appIconEmoji {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.appIconLabel {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.9);
+  text-align: center;
+  max-width: 68px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+/* --- Badge --------------------------------------------------------------- */
+
+.badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  background: #ff3b30;
+  border-radius: 9px;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  z-index: 2;
+}
+
+/* --- Dock ---------------------------------------------------------------- */
+
+.dock {
+  position: relative;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  height: 72px;
+  padding: 0 24px;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  background: rgba(30, 30, 50, 0.7);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+}
+
+.dockIcon {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.15s ease;
+}
+
+.dockIcon:active {
+  transform: scale(0.9);
+}
+
+.dockIcon:focus-visible {
+  outline: 2px solid var(--color-mint, #a8e6cf);
+  outline-offset: 2px;
+  border-radius: 16px;
+}
+
+.dockIconImage {
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.dockIconImage svg {
+  width: 30px;
+  height: 30px;
+}
+
+.dockBadge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  background: #ff3b30;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  z-index: 2;
+}
+
+.dockIndicator {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.8);
+  transition: opacity 0.15s ease;
+}
+
+.dockIndicatorHidden {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.8);
+  opacity: 0;
+}
+
+/* --- App Container ------------------------------------------------------- */
+
+.appContainer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  color: #1a1a2e;
+}
+
+/* --- App Header ---------------------------------------------------------- */
+
+.appHeader {
+  display: flex;
+  align-items: center;
+  height: 44px;
+  padding: 0 8px;
+  background: #fafafa;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  flex-shrink: 0;
+}
+
+.appHeaderBack {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: none;
+  border: none;
+  color: #667eea;
+  font-size: 20px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  padding: 0;
+}
+
+.appHeaderBack:active {
+  opacity: 0.5;
+}
+
+.appHeaderBack:focus-visible {
+  outline: 2px solid #667eea;
+  outline-offset: -2px;
+  border-radius: 8px;
+}
+
+.appHeaderTitle {
+  flex: 1;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a2e;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.appHeaderHome {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: none;
+  border: none;
+  color: #667eea;
+  font-size: 16px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  padding: 0;
+}
+
+.appHeaderHome:active {
+  opacity: 0.5;
+}
+
+.appHeaderHome:focus-visible {
+  outline: 2px solid #667eea;
+  outline-offset: -2px;
+  border-radius: 8px;
+}
+
+/* --- App Content --------------------------------------------------------- */
+
+.appContent {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain; /* prevent pull-to-refresh interference */
+  /* Ensure nested flex items resolve height properly */
+  min-height: 0;
+  /* Explicit background prevents dark-themed apps (Terminal) from bleeding through */
+  background: #fff;
+}
+
+/* --- Dark theme overrides ------------------------------------------------ */
+
+[data-theme="dark"] .appContainer {
+  background: #1a1a2e;
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .appContent {
+  background: #1a1a2e;
+}
+
+[data-theme="dark"] .appHeader {
+  background: #1e1e3a;
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .appHeaderTitle {
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .appHeaderBack,
+[data-theme="dark"] .appHeaderHome {
+  color: #a8d8ea;
+}
+
+/* --- App Transition Animations ------------------------------------------ */
+
+@keyframes appEnter {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes appExit {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(30%);
+  }
+}
+
+.appContainerEntering {
+  animation: appEnter 200ms ease-out forwards;
+}
+
+.appContainerExiting {
+  animation: appExit 200ms ease-in forwards;
+  pointer-events: none;
+}
+
+/* --- Loading Skeleton --------------------------------------------------- */
+
+.appLoadingSkeleton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 12px;
+  background: inherit;
+}
+
+.appLoadingSpinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid rgba(0, 0, 0, 0.1);
+  border-top-color: #667eea;
+  border-radius: 50%;
+  animation: spinLoader 0.6s linear infinite;
+}
+
+[data-theme="dark"] .appLoadingSpinner {
+  border-color: rgba(255, 255, 255, 0.1);
+  border-top-color: #a8d8ea;
+}
+
+@keyframes spinLoader {
+  to { transform: rotate(360deg); }
+}
+
+.appLoadingText {
+  font-size: 13px;
+  color: #888;
+}
+
+/* --- Smooth Scroll Behaviors -------------------------------------------- */
+
+.scrollSnapX {
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.scrollSnapChild {
+  scroll-snap-align: start;
+}
+
+.scrollContain {
+  overscroll-behavior: contain;
+}
+
+/* --- Reduced Motion ----------------------------------------------------- */
+
+/* --- Quick Session Modal ------------------------------------------------ */
+
+.sessionModalBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.sessionModalPanel {
+  width: 100%;
+  max-width: 440px;
+  max-height: 75vh;
+  background: rgba(30, 30, 55, 0.97);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border-radius: 16px 16px 0 0;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideUp 0.3s ease-out;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.sessionModalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+}
+
+.sessionModalTitle {
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.sessionModalClose {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 24px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  padding: 0;
+}
+
+.sessionModalClose:active {
+  opacity: 0.5;
+}
+
+.sessionModalContent {
+  padding: 8px 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.sessionModalSection {
+  margin-top: 4px;
+}
+
+.sessionModalSectionTitle {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: rgba(255, 255, 255, 0.45);
+  padding: 8px 20px 4px;
+}
+
+.sessionModalRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  min-height: 44px;
+}
+
+.sessionModalRowInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.sessionModalRowLabel {
+  font-size: 15px;
+  font-weight: 500;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sessionModalRowValue {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.sessionModalJump {
+  flex-shrink: 0;
+  padding: 6px 14px;
+  margin-left: 12px;
+  background: rgba(102, 126, 234, 0.2);
+  border: 1px solid rgba(102, 126, 234, 0.35);
+  border-radius: 8px;
+  color: #a8c4ff;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  min-height: 32px;
+}
+
+.sessionModalJump:active {
+  opacity: 0.6;
+}
+
+/* --- Quick Action Menu ------------------------------------------------- */
+
+.quickActionMenu {
+  position: fixed;
+  z-index: 500;
+  background: rgba(40, 40, 65, 0.97);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border-radius: 14px;
+  padding: 4px 0;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+  animation: quickActionIn 0.15s ease-out;
+  overflow: hidden;
+}
+
+@keyframes quickActionIn {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.quickActionItem {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 0 16px;
+  height: 44px;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 400;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.quickActionItem:active {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.quickActionItem + .quickActionItem {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* --- Reduced Motion ----------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .appContainerEntering {
+    animation: none;
+  }
+
+  .appContainerExiting {
+    animation: none;
+  }
+
+  .appLoadingSpinner {
+    animation: none;
+    border-top-color: transparent;
+    opacity: 0.5;
+  }
+}

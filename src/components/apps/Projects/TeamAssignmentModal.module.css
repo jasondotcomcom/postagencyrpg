@@ -337,3 +337,60 @@
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(168, 230, 207, 0.5);
 }
+
+/* ─── Mobile overrides ───────────────────────────────────────────────────── */
+@media (max-width: 767px) {
+  .overlay {
+    align-items: stretch;
+  }
+
+  .modal {
+    width: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    height: 100%;
+    border-radius: 0;
+  }
+
+  .memberCard {
+    min-height: 44px;
+    padding: 12px;
+  }
+
+  .memberAvatar {
+    width: 44px;
+    height: 44px;
+  }
+
+  .checkMark {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+  }
+
+  .closeButton {
+    width: 44px;
+    height: 44px;
+    font-size: 1.5rem;
+  }
+
+  .saveButton,
+  .cancelButton {
+    min-height: 44px;
+  }
+
+  .footer {
+    flex-direction: column;
+    gap: 10px;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .footerActions {
+    width: 100%;
+  }
+
+  .footerActions .saveButton,
+  .footerActions .cancelButton {
+    flex: 1;
+  }
+}

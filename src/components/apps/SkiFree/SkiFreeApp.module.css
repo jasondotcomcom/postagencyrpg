@@ -1,0 +1,210 @@
+/* ─── Escape the Quarterly Review ───────────────────────────────────────── */
+
+.container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, #dceefb 0%, #f0f7ff 40%, #ffffff 100%);
+  font-family: 'Quicksand', sans-serif;
+  overflow: hidden;
+  position: relative;
+  user-select: none;
+}
+
+/* ─── HUD ────────────────────────────────────────────────────────────────── */
+
+.hud {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px;
+  z-index: 10;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+  font-size: 0.8125rem;
+  color: #e0e0e0;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 0.5px;
+}
+
+.score {
+  font-weight: 700;
+  color: #ffdd57;
+  font-size: 0.9375rem;
+}
+
+.timer {
+  color: #aad4ff;
+}
+
+.boostIndicator {
+  color: #7ec8ff;
+  font-weight: 700;
+  text-shadow: 0 0 6px rgba(126, 200, 255, 0.6);
+  animation: boostPulse 0.4s ease-in-out infinite alternate;
+}
+
+@keyframes boostPulse {
+  from { opacity: 0.7; }
+  to { opacity: 1; }
+}
+
+.yetiWarning {
+  color: #ff6b6b;
+  font-weight: 700;
+  animation: blink 0.5s steps(2, start) infinite;
+}
+
+@keyframes blink {
+  to {
+    visibility: hidden;
+  }
+}
+
+/* ─── Canvas ─────────────────────────────────────────────────────────────── */
+
+.canvas {
+  display: block;
+  image-rendering: pixelated;
+}
+
+/* ─── Start / Game Over Overlay ──────────────────────────────────────────── */
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 25, 50, 0.82);
+  backdrop-filter: blur(6px);
+  z-index: 20;
+  gap: 16px;
+  text-align: center;
+  padding: 24px;
+}
+
+.title {
+  font-family: 'Courier New', monospace;
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: #ffffff;
+  text-shadow: 2px 2px 0 #2255aa, 4px 4px 0 #113366;
+  letter-spacing: 2px;
+  margin: 0;
+}
+
+.subtitle {
+  font-family: 'Quicksand', sans-serif;
+  font-size: 0.9375rem;
+  color: #aaccee;
+  margin: 0;
+  max-width: 320px;
+  line-height: 1.5;
+}
+
+.finalScore {
+  font-family: 'Courier New', monospace;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #ffdd57;
+  margin: 4px 0;
+}
+
+.deathMessage {
+  font-size: 1rem;
+  color: #ff8888;
+  font-family: 'Courier New', monospace;
+}
+
+.button {
+  margin-top: 8px;
+  padding: 10px 28px;
+  font-family: 'Courier New', monospace;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #ffffff;
+  background: #3366aa;
+  border: 2px solid #5588cc;
+  border-radius: 4px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: background 0.15s, transform 0.1s;
+}
+
+.button:hover {
+  background: #4477bb;
+  transform: translateY(-1px);
+}
+
+.button:active {
+  transform: translateY(1px);
+}
+
+.controls {
+  font-family: 'Courier New', monospace;
+  font-size: 0.75rem;
+  color: #7799bb;
+  margin-top: 4px;
+}
+
+/* ─── Touch Overlay for Mobile ──────────────────────────────────────────── */
+
+.touchOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  touch-action: none;
+  pointer-events: auto;
+  display: none;
+}
+
+.touchIndicatorLeft,
+.touchIndicatorRight {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 2rem;
+  color: rgba(255, 255, 255, 0.15);
+  pointer-events: none;
+  user-select: none;
+}
+
+.touchIndicatorLeft {
+  left: 12px;
+}
+
+.touchIndicatorRight {
+  right: 12px;
+}
+
+.touchIndicatorSwipeUp {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.15);
+  pointer-events: none;
+  user-select: none;
+  text-align: center;
+}
+
+@media (max-width: 768px), (pointer: coarse) {
+  .touchOverlay {
+    display: block;
+  }
+
+  .canvas {
+    touch-action: none;
+  }
+}

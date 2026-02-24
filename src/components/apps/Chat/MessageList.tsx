@@ -111,6 +111,11 @@ export default function MessageList(): React.ReactElement {
                     </div>
                   )}
                   <div className={styles.messageText}>{msg.text}</div>
+                  {msg.imageUrl && (
+                    <div className={styles.messageImage}>
+                      <pre>{msg.imageUrl}</pre>
+                    </div>
+                  )}
                   {msg.reactions.length > 0 && (
                     <div className={styles.reactions}>
                       {msg.reactions.map((r, ri) => (

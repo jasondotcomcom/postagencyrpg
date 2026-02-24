@@ -207,3 +207,45 @@
 .high-contrast .prompt {
   color: #ffff00;
 }
+
+/* ─── Mobile overrides ───────────────────────────────────────────────────── */
+@media (max-width: 767px) {
+  .terminal {
+    font-size: 0.75rem;
+  }
+
+  .outputArea {
+    padding: 12px 14px 8px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .outputArea::-webkit-scrollbar {
+    display: none;
+  }
+
+  .inputRow {
+    padding: 8px 14px 10px;
+    padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .inputRow input.input {
+    font-size: 16px; /* prevents iOS zoom */
+    min-height: 44px;
+  }
+
+  .prompt {
+    font-size: 0.75rem;
+  }
+
+  .portraitBlock {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .portraitImg {
+    width: 100px;
+    height: 100px;
+  }
+}

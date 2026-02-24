@@ -40,6 +40,16 @@
   background: linear-gradient(90deg, var(--color-peach), #e89090);
 }
 
+.moraleFill.toxic {
+  width: 12%;
+  background: linear-gradient(90deg, #e05050, #c03030);
+}
+
+.moraleFill.mutiny {
+  width: 5%;
+  background: linear-gradient(90deg, #8b0000, #2a0a0a);
+}
+
 .moraleText {
   font-size: 0.6875rem;
   font-weight: 600;

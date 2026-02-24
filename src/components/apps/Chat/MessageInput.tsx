@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { useChatContext } from '../../../context/ChatContext';
 import { useAchievementContext } from '../../../context/AchievementContext';
+import { useConductContext } from '../../../context/ConductContext';
 import type { MoraleLevel } from '../../../types/chat';
 import styles from './MessageInput.module.css';
 
@@ -100,15 +101,11 @@ Reactions should sound natural and corporate. Delays: first at 2000-3000ms, seco
 }
 
 function nextMorale(current: MoraleLevel, impact: 'up' | 'same' | 'down'): MoraleLevel {
+  const levels: MoraleLevel[] = ['mutiny', 'toxic', 'low', 'medium', 'high'];
   if (impact === 'same') return current;
-  if (impact === 'up') {
-    if (current === 'low') return 'medium';
-    if (current === 'medium') return 'high';
-    return 'high';
-  }
-  if (current === 'high') return 'medium';
-  if (current === 'medium') return 'low';
-  return 'low';
+  const idx = levels.indexOf(current);
+  if (impact === 'up') return levels[Math.min(idx + 1, levels.length - 1)];
+  return levels[Math.max(idx - 1, 0)];
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -116,6 +113,7 @@ function nextMorale(current: MoraleLevel, impact: 'up' | 'same' | 'down'): Moral
 export default function MessageInput(): React.ReactElement {
   const { activeChannel, channels, messages, morale, addMessage, setMorale } = useChatContext();
   const { unlockAchievement, incrementCounter, resetCounter } = useAchievementContext();
+  const { reportIncident, reportCorporate } = useConductContext();
   const [text, setText] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [moraleNotif, setMoraleNotif] = useState<{ icon: string; text: string } | null>(null);
@@ -144,6 +142,34 @@ export default function MessageInput(): React.ReactElement {
       if (streak >= 3) unlockAchievement('all-caps-chat');
     } else {
       resetCounter('caps-streak');
+    }
+    // ──────────────────────────────────────────────────────────────────────
+
+    // ─── Conduct system — humanity detection ──────────────────────────────
+    // Positive/human language triggers HR; corporate buzzwords are rewarded
+    const humanityPatterns: Array<{ pattern: RegExp; flag: 'emotional' | 'informal' | 'empathetic' | 'human' | 'work_life_balance'; desc: string }> = [
+      { pattern: /\b(i feel|i'm feeling|feeling)\b/i, flag: 'emotional', desc: 'Expressed personal feelings' },
+      { pattern: /\b(i love|love you|love this team)\b/i, flag: 'emotional', desc: 'Used the word "love" in a professional context' },
+      { pattern: /\b(work.life balance|take a break|go home early|mental health)\b/i, flag: 'work_life_balance', desc: 'Referenced work-life balance' },
+      { pattern: /\b(are you okay|how are you|hope you'?re? (doing )?well)\b/i, flag: 'empathetic', desc: 'Showed concern for a colleague' },
+      { pattern: /\b(I'?m sorry|my bad|I apologize)\b/i, flag: 'empathetic', desc: 'Apologized sincerely' },
+      { pattern: /\b(great job|proud of|you'?re? amazing|well done)\b/i, flag: 'human', desc: 'Praised a team member genuinely' },
+      { pattern: /\b(friend|buddy|pal|fam)\b/i, flag: 'informal', desc: 'Used informal/personal address' },
+      { pattern: /\b(hug|cry|tears|miss you|care about)\b/i, flag: 'emotional', desc: 'Displayed emotional vulnerability' },
+    ];
+
+    const corporatePatterns = /\b(synergy|leverage|align|optimize|stakeholder|deliverable|circle back|bandwidth|scalable|KPI|ROI|per my last|as per|going forward|touch base|deep dive|move the needle)\b/i;
+
+    let conductTriggered = false;
+    for (const { pattern, flag, desc } of humanityPatterns) {
+      if (pattern.test(trimmed)) {
+        reportIncident(flag, desc);
+        conductTriggered = true;
+        break; // One trigger per message
+      }
+    }
+    if (!conductTriggered && corporatePatterns.test(trimmed)) {
+      reportCorporate();
     }
     // ──────────────────────────────────────────────────────────────────────
 
@@ -204,7 +230,7 @@ export default function MessageInput(): React.ReactElement {
       setIsAnalyzing(false);
     }
   }, [text, activeChannel, messages, morale, addMessage, setMorale, showNotif,
-      unlockAchievement, incrementCounter, resetCounter]);
+      unlockAchievement, incrementCounter, resetCounter, reportIncident, reportCorporate]);
 
   if (channel?.readOnly) {
     return (

@@ -1034,3 +1034,129 @@
 .progressMiniFill { height: 100%; background: linear-gradient(90deg, var(--color-mint), var(--color-sky), var(--color-lavender)); border-radius: 2px; transition: width 0.5s ease; }
 .progressMiniLabel { font-size: 0.6875rem; color: var(--text-muted); white-space: nowrap; font-weight: 600; }
 .scoreDisplay { font-size: 0.6875rem; color: var(--text-muted); font-weight: 600; }
+
+/* ─── Typo Find ───────────────────────────────── */
+.typoWrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  justify-content: center;
+  align-items: center;
+  max-width: 400px;
+  padding: 12px;
+}
+
+.typoWord {
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: rgba(0, 0, 0, 0.04);
+  border: 2px solid transparent;
+  transition: all 0.15s ease;
+}
+.typoWord:hover { background: rgba(0, 0, 0, 0.08); transform: translateY(-1px); }
+
+.typoCorrect {
+  border-color: var(--color-mint) !important;
+  background: rgba(168, 230, 207, 0.2) !important;
+  animation: correctFlash 0.3s ease;
+}
+.typoWrong {
+  border-color: var(--color-peach) !important;
+  background: rgba(255, 183, 178, 0.2) !important;
+  animation: wrongShake 0.3s ease;
+}
+
+/* ─── Spot Difference ──────────────────────────── */
+.spotWrap {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  align-items: stretch;
+  width: 100%;
+  max-width: 420px;
+}
+
+.spotPanel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 16px 12px;
+  border-radius: 12px;
+  border: 2px solid rgba(0, 0, 0, 0.08);
+  background: white;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.spotPanel:hover { border-color: var(--color-lavender); transform: translateY(-2px); }
+
+.spotEmoji { font-size: 2rem; line-height: 1; }
+.spotLine { font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); text-align: center; }
+
+.spotCorrect {
+  border-color: var(--color-mint) !important;
+  background: rgba(168, 230, 207, 0.15) !important;
+  animation: correctFlash 0.3s ease;
+}
+.spotWrong {
+  border-color: var(--color-peach) !important;
+  background: rgba(255, 183, 178, 0.15) !important;
+  animation: wrongShake 0.3s ease;
+}
+
+/* ─── Swipe Game ───────────────────────────────── */
+.swipeWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  max-width: 320px;
+}
+
+.swipeProgress {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
+}
+
+.swipeCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 24px 32px;
+  border-radius: 16px;
+  border: 2px solid rgba(0, 0, 0, 0.08);
+  background: white;
+  min-width: 180px;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.swipeEmoji { font-size: 2.5rem; line-height: 1; }
+.swipeLabel { font-size: 0.875rem; font-weight: 700; color: var(--text-dark); text-align: center; }
+
+.swipeExitLeft { transform: translateX(-120px) rotate(-12deg); opacity: 0; }
+.swipeExitRight { transform: translateX(120px) rotate(12deg); opacity: 0; }
+
+.swipeBtns { display: flex; gap: 16px; }
+
+.swipeBtn {
+  padding: 10px 24px;
+  border-radius: 12px;
+  border: 2px solid rgba(0, 0, 0, 0.08);
+  background: white;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.swipeBtn:hover { transform: translateY(-2px); }
+
+.swipeLeft:hover { border-color: var(--color-peach); background: rgba(255, 183, 178, 0.1); }
+.swipeRight:hover { border-color: var(--color-mint); background: rgba(168, 230, 207, 0.1); }

@@ -134,7 +134,7 @@
   overflow-y: auto;
 }
 
-@media (max-width: 700px) {
+@media (max-width: 767px) {
   .splitView {
     flex-direction: column;
   }

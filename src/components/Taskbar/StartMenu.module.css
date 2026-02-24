@@ -1,0 +1,245 @@
+/* ─── Start Menu ────────────────────────────────────────────────────────────── */
+
+.menu {
+  position: fixed;
+  bottom: 64px;
+  left: 12px;
+  width: 280px;
+  background: linear-gradient(180deg, rgba(237, 235, 231, 0.98) 0%, rgba(228, 226, 222, 0.98) 100%);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(154, 176, 176, 0.3);
+  border-radius: 12px 12px 12px 4px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
+  z-index: 10001;
+  padding: 6px 0;
+  animation: menuSlideUp 0.15s ease;
+  font-family: inherit;
+}
+
+@keyframes menuSlideUp {
+  0%   { opacity: 0; transform: translateY(8px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Header ───────────────────────────────────────────────────────────────── */
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, rgba(74, 85, 104, 0.12) 0%, rgba(122, 152, 152, 0.12) 100%);
+  margin: 0 4px 2px;
+  border-radius: 8px;
+}
+
+.headerAvatar {
+  font-size: 1.5rem;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(74, 85, 104, 0.1);
+  border-radius: 10px;
+}
+
+.headerName {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+
+/* ─── Separator ────────────────────────────────────────────────────────────── */
+
+.separator {
+  height: 1px;
+  margin: 4px 12px;
+  background: rgba(0, 0, 0, 0.06);
+}
+
+/* ─── Menu Item ────────────────────────────────────────────────────────────── */
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 16px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-dark);
+  text-align: left;
+  transition: background 0.1s ease;
+  position: relative;
+}
+
+.item:hover:not(:disabled) {
+  background: rgba(154, 176, 176, 0.15);
+}
+
+.item:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.itemIcon {
+  font-size: 1rem;
+  width: 22px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.itemLabel {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.itemArrow {
+  font-size: 0.625rem;
+  color: var(--text-secondary);
+  margin-left: auto;
+}
+
+/* ─── Submenu ──────────────────────────────────────────────────────────────── */
+
+.submenu {
+  position: absolute;
+  left: 100%;
+  top: -6px;
+  width: 240px;
+  background: linear-gradient(180deg, rgba(237, 235, 231, 0.98) 0%, rgba(228, 226, 222, 0.98) 100%);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(154, 176, 176, 0.3);
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  padding: 6px 0;
+  z-index: 10002;
+  animation: submenuSlideIn 0.1s ease;
+}
+
+@keyframes submenuSlideIn {
+  0%   { opacity: 0; transform: translateX(-4px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+.submenuEmpty {
+  padding: 12px 16px;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-style: italic;
+  text-align: center;
+}
+
+/* ─── Confirmation Dialog ──────────────────────────────────────────────────── */
+
+.confirmDialog {
+  padding: 20px;
+  text-align: center;
+}
+
+.confirmIcon {
+  font-size: 2rem;
+  margin-bottom: 8px;
+}
+
+.confirmTitle {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 6px;
+}
+
+.confirmText {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
+.confirmButtons {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.confirmCancel,
+.confirmDanger,
+.confirmOk {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.confirmCancel {
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--text-secondary);
+}
+.confirmCancel:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.confirmDanger {
+  background: linear-gradient(135deg, #8b0000, #a52a2a);
+  color: white;
+}
+.confirmDanger:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(139, 0, 0, 0.3);
+}
+
+.confirmOk {
+  background: linear-gradient(135deg, var(--color-mint), var(--color-sky));
+  color: var(--text-dark);
+}
+.confirmOk:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(154, 176, 176, 0.4);
+}
+
+/* ─── Dark Theme ───────────────────────────────────────────────────────────── */
+
+:global([data-theme="dark"]) .menu,
+:global([data-theme="dark"]) .submenu {
+  background: linear-gradient(180deg, rgba(26, 26, 46, 0.98) 0%, rgba(20, 20, 40, 0.98) 100%) !important;
+  border-color: rgba(80, 80, 140, 0.4) !important;
+}
+
+:global([data-theme="dark"]) .header {
+  background: linear-gradient(135deg, rgba(74, 85, 104, 0.2) 0%, rgba(60, 60, 80, 0.2) 100%) !important;
+}
+
+:global([data-theme="dark"]) .item:hover {
+  background: rgba(80, 80, 140, 0.2) !important;
+}
+
+:global([data-theme="dark"]) .separator {
+  background: rgba(255, 255, 255, 0.06) !important;
+}
+
+/* ─── High Contrast ────────────────────────────────────────────────────────── */
+
+:global(.high-contrast) .menu,
+:global(.high-contrast) .submenu {
+  background: #000 !important;
+  border: 2px solid #fff !important;
+}
+
+:global(.high-contrast) .item:hover {
+  background: #333 !important;
+}

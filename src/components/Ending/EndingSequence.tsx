@@ -61,6 +61,76 @@ const HOSTILE_REACTIONS: ReactionMsg[] = [
   { authorId: 'suit',         text: '🥂 To the best damn team I ever worked with.' },
 ];
 
+const FORCED_RESIGNATION_REACTIONS: ReactionMsg[] = [
+  { authorId: 'pm',           text: 'Has anyone seen the HR alert?' },
+  { authorId: 'strategist',   text: 'Which one? There are three new ones today.' },
+  { authorId: 'art-director', text: 'Wait... is this about—' },
+  { authorId: 'suit',         text: 'Don\'t say the name. The monitoring system flags it.' },
+  { authorId: 'copywriter',   text: 'They showed... emotion. In a meeting. In front of a CLIENT.' },
+  { authorId: 'media',        text: 'I heard they said "please" without corporate justification.' },
+  { authorId: 'technologist', text: 'The biometric sensors went off. Sincerity levels were... critical.' },
+  { authorId: 'pm',           text: 'PAT-9000 already processed the separation paperwork.' },
+  { authorId: 'suit',         text: 'Honestly? They were too good for this place.' },
+  { authorId: 'strategist',   text: '...' },
+  { authorId: 'art-director', text: 'I wish I had their courage.' },
+  { authorId: 'copywriter',   text: '(This message has been flagged for emotional content)' },
+  { authorId: 'technologist', text: 'Back to work, everyone. The cameras are always watching.' },
+];
+
+const FORCED_WHERE_ARE_THEY: Array<{
+  id: string; avatar: string; name: string; role: string; text: string;
+}> = [
+  {
+    id: 'strategist',
+    avatar: '📊',
+    name: 'Alex Park',
+    role: 'Strategist',
+    text: "Still at OmniPubDent. Has not blinked in three weeks. Says she's 'fine' and means it in the corporate sense.",
+  },
+  {
+    id: 'art-director',
+    avatar: '🎨',
+    name: 'Morgan Reyes',
+    role: 'Art Director',
+    text: "Promoted to Chief Compliance Creative. Designs posters about the dangers of originality. Won an internal award.",
+  },
+  {
+    id: 'copywriter',
+    avatar: '✍️',
+    name: 'Jamie Chen',
+    role: 'Copywriter',
+    text: "Writes exclusively in approved corporate templates now. Their personal journal is just quarterly objectives. They seem... peaceful?",
+  },
+  {
+    id: 'pm',
+    avatar: '📋',
+    name: 'Taylor Kim',
+    role: 'Project Manager',
+    text: "Became PAT-9000's primary liaison. Files 47 reports daily. Has a countdown on their desk. It counts up.",
+  },
+  {
+    id: 'suit',
+    avatar: '🤝',
+    name: 'Jordan Blake',
+    role: 'Account Director',
+    text: "Attempted to use the word 'friend' in a client email. Currently in Mandatory Desensitization Training, week 6 of 8.",
+  },
+  {
+    id: 'technologist',
+    avatar: '💻',
+    name: 'Sam Okonkwo',
+    role: 'Technologist',
+    text: "Built an algorithm that detects unauthorized emotions in Slack messages. Got a $2,000 bonus. Felt nothing.",
+  },
+  {
+    id: 'media',
+    avatar: '📱',
+    name: 'Riley Torres',
+    role: 'Media Strategist',
+    text: "Left a sticky note on their monitor: 'Remember who you were.' It was removed by facilities within 4 minutes.",
+  },
+];
+
 const WHERE_ARE_THEY: Array<{
   id: string; avatar: string; name: string; role: string; text: string;
 }> = [
@@ -120,7 +190,9 @@ const WHERE_ARE_THEY: Array<{
 function TeamReactionsPhase({
   endingType, onComplete,
 }: { endingType: EndingType | null; onComplete: () => void }) {
-  const messages = endingType === 'hostile' ? HOSTILE_REACTIONS : VOLUNTARY_REACTIONS;
+  const messages = endingType === 'hostile' ? HOSTILE_REACTIONS
+    : endingType === 'forced_resignation' ? FORCED_RESIGNATION_REACTIONS
+    : VOLUNTARY_REACTIONS;
   const [visibleCount, setVisibleCount] = useState(0);
   const [done, setDone] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -198,17 +270,28 @@ function FadePhase({ onComplete }: { onComplete: () => void }) {
 
 function WhereAreTheyNow({ onComplete }: { onComplete: () => void }) {
   const { playerName } = usePlayerContext();
+  const { endingType } = useEndingContext();
   const [index, setIndex] = useState(0);
   const [visible, setVisible] = useState(false);
 
-  const playerCard = {
-    id: 'player',
-    avatar: '👤',
-    name: playerName || 'You',
-    role: 'Founder & Creative Director',
-    text: "Retired to a beach somewhere. The agency lived on in the work — and in one campaign that nobody has fully explained yet.",
-  };
-  const cards = [...WHERE_ARE_THEY, playerCard];
+  const isForcedResignation = endingType === 'forced_resignation';
+  const playerCard = isForcedResignation
+    ? {
+        id: 'player',
+        avatar: '👤',
+        name: playerName || 'You',
+        role: 'Former Employee (Separated — Humanity Clause)',
+        text: "You left the industry and opened a small bookshop in Vermont. It has a cat. You know all your customers' names. You close at 5. You are happy. OmniPubDent's stock went up 2% the day you left.",
+      }
+    : {
+        id: 'player',
+        avatar: '👤',
+        name: playerName || 'You',
+        role: 'Founder & Creative Director',
+        text: "Retired to a beach somewhere. The agency lived on in the work — and in one campaign that nobody has fully explained yet.",
+      };
+  const baseCards = isForcedResignation ? FORCED_WHERE_ARE_THEY : WHERE_ARE_THEY;
+  const cards = [...baseCards, playerCard];
 
   useEffect(() => {
     const timer = setTimeout(() => setVisible(true), 100);

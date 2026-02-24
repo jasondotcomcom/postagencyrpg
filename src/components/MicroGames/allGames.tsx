@@ -17,6 +17,8 @@ import {
   LayerSearchGame,
   TabCloseGame,
   SpinBuildGame,
+  TypoFindGame,
+  SpotDifferenceGame,
 } from './GameMechanics';
 
 // ─── Theme Selection Helpers ─────────────────────────────────────────────────
@@ -458,6 +460,7 @@ export const ALL_GAMES: GameDef[] = [
     instruction: 'SPIN FOR APPROVAL!',
     duration: 10000,
     category: 'flick',
+    weight: 0.3,
     waitPhase: 'both',
     render: (onWin, onFail) => {
       const targets = [45, 135, 225, 315];
@@ -481,6 +484,7 @@ export const ALL_GAMES: GameDef[] = [
     instruction: 'BUDGET ROULETTE!',
     duration: 10000,
     category: 'flick',
+    weight: 0.3,
     waitPhase: 'both',
     render: (onWin, onFail) => {
       const targets = [45, 135, 225, 315];
@@ -504,6 +508,7 @@ export const ALL_GAMES: GameDef[] = [
     instruction: 'CLIENT ROULETTE!',
     duration: 10000,
     category: 'flick',
+    weight: 0.3,
     waitPhase: 'both',
     render: (onWin, onFail) => {
       const targets = [45, 135, 225, 315];
@@ -527,6 +532,7 @@ export const ALL_GAMES: GameDef[] = [
     instruction: 'DEADLINE SPINNER!',
     duration: 10000,
     category: 'flick',
+    weight: 0.3,
     waitPhase: 'both',
     render: (onWin, onFail) => {
       const targets = [45, 135, 225, 315];
@@ -550,6 +556,7 @@ export const ALL_GAMES: GameDef[] = [
     instruction: 'FEEDBACK ROULETTE!',
     duration: 10000,
     category: 'flick',
+    weight: 0.3,
     waitPhase: 'both',
     render: (onWin, onFail) => {
       const targets = [45, 135, 225, 315];
@@ -573,6 +580,7 @@ export const ALL_GAMES: GameDef[] = [
     instruction: 'SPIN THE CHAIR!',
     duration: 10000,
     category: 'flick',
+    weight: 0.3,
     waitPhase: 'both',
     render: (onWin, onFail) => {
       const targets = [45, 135, 225, 315];
@@ -964,5 +972,294 @@ export const ALL_GAMES: GameDef[] = [
     ),
     winMsg: (m) => `Cohesive campaign! ${m.name} is proud.`,
     failMsg: () => `The elements scattered... needs more glue.`,
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // DYSTOPIAN DRAG & DROP (4 games)
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  {
+    id: 'stack-priorities',
+    instruction: 'STACK THE PRIORITIES!',
+    duration: 12000,
+    category: 'drag',
+    weight: 1.5,
+    waitPhase: 'both',
+    render: (onWin) => {
+      const urgentItems = shuffle([
+        { id: 'a', emoji: '🔴', label: 'URGENT: CEO deck', correctZone: 'slot1' },
+        { id: 'b', emoji: '🔴', label: 'URGENT: Board mtg', correctZone: 'slot2' },
+        { id: 'c', emoji: '🔴', label: 'CEO PRIORITY: Rebrand', correctZone: 'slot3' },
+      ]);
+      return (
+        <DragDropGame
+          items={urgentItems}
+          zones={[
+            { id: 'slot1', emoji: '1️⃣', label: 'Do First' },
+            { id: 'slot2', emoji: '2️⃣', label: 'Do Second' },
+            { id: 'slot3', emoji: '3️⃣', label: 'Do Third' },
+          ]}
+          onWin={onWin}
+        />
+      );
+    },
+    winMsg: () => `Priorities stacked! Everything is urgent, but at least they're ordered.`,
+    failMsg: () => `Wrong order. The CEO noticed. They always notice.`,
+  },
+  {
+    id: 'build-exec-deck',
+    instruction: 'BUILD THE EXECUTIVE DECK!',
+    duration: 12000,
+    category: 'drag',
+    weight: 1.5,
+    waitPhase: 'generating',
+    render: (onWin) => (
+      <DragDropGame
+        items={shuffle([
+          { id: 'a', emoji: '📊', label: 'Vanity Metrics', correctZone: 'slide1' },
+          { id: 'b', emoji: '📈', label: 'Hockey Stick Graph', correctZone: 'slide2' },
+          { id: 'c', emoji: '🏆', label: 'Awards We Bought', correctZone: 'slide3' },
+        ])}
+        zones={[
+          { id: 'slide1', emoji: '📑', label: 'Opener' },
+          { id: 'slide2', emoji: '📑', label: 'The Promise' },
+          { id: 'slide3', emoji: '📑', label: 'The Proof' },
+        ]}
+        onWin={onWin}
+      />
+    ),
+    winMsg: (m) => `Deck assembled! ${m.name} says "looks very executive."`,
+    failMsg: () => `Slides out of order. The C-suite is confused. More confused than usual.`,
+  },
+  {
+    id: 'file-the-assets',
+    instruction: 'FILE THE LEAKED ASSETS!',
+    duration: 14000,
+    category: 'drag',
+    weight: 1.5,
+    waitPhase: 'both',
+    render: (onWin) => {
+      const items = shuffle([
+        { id: 'a', emoji: '📄', label: 'Q3 Layoff Plan', correctZone: 'shred' },
+        { id: 'b', emoji: '📑', label: 'Salary Spreadsheet', correctZone: 'classify' },
+        { id: 'c', emoji: '📋', label: 'CEO Search History', correctZone: 'deny' },
+      ]);
+      return (
+        <DragDropGame
+          items={items}
+          zones={[
+            { id: 'shred',    emoji: '🔥', label: 'Shred' },
+            { id: 'classify', emoji: '🔒', label: 'Classify' },
+            { id: 'deny',     emoji: '🙈', label: 'Deny Knowledge' },
+          ]}
+          onWin={onWin}
+        />
+      );
+    },
+    winMsg: () => `Assets filed. What assets? There were never any assets.`,
+    failMsg: () => `Misfiled. HR has been notified. About you, not the files.`,
+  },
+  {
+    id: 'sort-feedback-dystopia',
+    instruction: 'SORT THE FEEDBACK!',
+    duration: 14000,
+    category: 'drag',
+    weight: 1.5,
+    waitPhase: 'both',
+    render: (onWin) => {
+      const feedbackSets = [
+        [
+          { id: 'a', emoji: '💬', label: '"This needs work"', correctZone: 'comply' },
+          { id: 'b', emoji: '💬', label: '"Great direction!"', correctZone: 'enthuse' },
+          { id: 'c', emoji: '💬', label: '"I have concerns"', correctZone: 'reeducate' },
+        ],
+        [
+          { id: 'a', emoji: '💬', label: '"Per my last email"', correctZone: 'comply' },
+          { id: 'b', emoji: '💬', label: '"Love the synergy"', correctZone: 'enthuse' },
+          { id: 'c', emoji: '💬', label: '"Actually, the data shows..."', correctZone: 'reeducate' },
+        ],
+      ];
+      const set = feedbackSets[Math.floor(Math.random() * feedbackSets.length)];
+      return (
+        <DragDropGame
+          items={shuffle(set)}
+          zones={[
+            { id: 'comply',     emoji: '✅', label: 'Comply' },
+            { id: 'enthuse',    emoji: '🎉', label: 'Enthusiastically Comply' },
+            { id: 'reeducate',  emoji: '📖', label: 'Schedule Re-education' },
+          ]}
+          onWin={onWin}
+        />
+      );
+    },
+    winMsg: () => `Feedback sorted. Compliance score: Adequate.`,
+    failMsg: () => `Incorrect sorting. Your re-education has been scheduled.`,
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // DYSTOPIAN CLICK / PICK GAMES (4 games)
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  {
+    id: 'spot-typo-memo',
+    instruction: 'SPOT THE TYPO IN THE MEMO!',
+    duration: 10000,
+    category: 'puzzle',
+    weight: 1.5,
+    waitPhase: 'both',
+    render: (onWin, onFail) => {
+      const memoSets = [
+        { words: ['We', 'are', 'commited', 'to', 'excellence', 'in', 'all', 'deliverables'], typo: 2 },
+        { words: ['Please', 'aline', 'your', 'priorities', 'with', 'corporate', 'vision'], typo: 1 },
+        { words: ['The', 'restructuring', 'will', 'enchance', 'operational', 'efficiency'], typo: 3 },
+        { words: ['Your', 'performace', 'review', 'has', 'been', 'scheduled'], typo: 1 },
+        { words: ['Manditory', 'fun', 'event', 'this', 'Friday', 'at', 'noon'], typo: 0 },
+        { words: ['All', 'employes', 'must', 'complete', 'compliance', 'training'], typo: 1 },
+      ];
+      const set = memoSets[Math.floor(Math.random() * memoSets.length)];
+      return <TypoFindGame words={set.words} typoIndex={set.typo} onWin={onWin} onFail={onFail} />;
+    },
+    winMsg: () => `Typo found! The memo has been corrected. Your vigilance is noted.`,
+    failMsg: () => `Wrong word. The typo went to print. Leadership is displeased.`,
+  },
+  {
+    id: 'approve-layout',
+    instruction: 'APPROVE THE LAYOUT!',
+    duration: 10000,
+    category: 'puzzle',
+    weight: 1.5,
+    waitPhase: 'generating',
+    render: (onWin, onFail) => {
+      const layoutSets = [
+        {
+          a: { emoji: '📄', lines: ['Header: 14pt', 'Body: Comic Sans', 'Logo: 40% opacity'] },
+          b: { emoji: '📄', lines: ['Header: 18pt', 'Body: Helvetica', 'Logo: Slightly off-center'] },
+          error: 'A' as const,
+        },
+        {
+          a: { emoji: '📐', lines: ['Margins: 0.5in', 'Color: Brand blue', 'Image: Low-res'] },
+          b: { emoji: '📐', lines: ['Margins: 1.0in', 'Color: Brand blue', 'Image: Hi-res'] },
+          error: 'A' as const,
+        },
+        {
+          a: { emoji: '🖥️', lines: ['Nav: Top aligned', 'CTA: Green', 'Footer: Complete'] },
+          b: { emoji: '🖥️', lines: ['Nav: Off-center', 'CTA: Red on red', 'Footer: Missing'] },
+          error: 'B' as const,
+        },
+      ];
+      const set = layoutSets[Math.floor(Math.random() * layoutSets.length)];
+      return <SpotDifferenceGame panelA={set.a} panelB={set.b} errorPanel={set.error} onWin={onWin} onFail={onFail} />;
+    },
+    winMsg: () => `Correct layout approved. Both had errors, but you picked the less bad one.`,
+    failMsg: () => `You approved the worse layout. It already went to the printer.`,
+  },
+  {
+    id: 'email-triage',
+    instruction: 'TRIAGE THE EMAILS!',
+    duration: 12000,
+    category: 'puzzle',
+    weight: 1.5,
+    waitPhase: 'both',
+    render: (onWin, onFail) => {
+      const emailSets = [
+        {
+          options: shuffle([
+            { emoji: '📧', label: 'CEO: "Call me ASAP"', sub: 'Sent 2 min ago', correct: true },
+            { emoji: '📧', label: 'CFO: "Budget NOW"', sub: 'Sent 5 min ago', correct: false },
+            { emoji: '📧', label: 'CTO: "System down"', sub: 'Sent 1 min ago', correct: false },
+          ]),
+        },
+        {
+          options: shuffle([
+            { emoji: '📧', label: 'VP: "Where is the deck?"', sub: 'Marked urgent', correct: false },
+            { emoji: '📧', label: 'CEO: "My office. Now."', sub: 'Sent just now', correct: true },
+            { emoji: '📧', label: 'Legal: "DO NOT REPLY ALL"', sub: 'High priority', correct: false },
+          ]),
+        },
+      ];
+      const set = emailSets[Math.floor(Math.random() * emailSets.length)];
+      return <PickOneGame context="Which email do you answer first?" options={set.options} onWin={onWin} onFail={onFail} />;
+    },
+    winMsg: () => `Correct prioritization. The CEO barely noticed your delay.`,
+    failMsg: () => `Wrong email first. The CEO's mood has shifted. You can feel it.`,
+  },
+  {
+    id: 'budget-math',
+    instruction: 'CALCULATE THE REMAINING BUDGET!',
+    duration: 10000,
+    category: 'puzzle',
+    weight: 1.5,
+    waitPhase: 'generating',
+    render: (onWin, onFail) => {
+      const problems = [
+        { context: 'Budget: $50K | Spent: $47.2K | What remains?', correct: '$2,800', decoys: ['$3,200', '$2,200', '$3,800'] },
+        { context: 'Budget: $120K | Spent: $118.5K | What remains?', correct: '$1,500', decoys: ['$2,500', '$1,000', '$15,000'] },
+        { context: 'Budget: $30K | Spent: $29.1K | What remains?', correct: '$900', decoys: ['$1,900', '$9,000', '$90'] },
+      ];
+      const p = problems[Math.floor(Math.random() * problems.length)];
+      return (
+        <PickOneGame
+          context={p.context}
+          options={shuffle([
+            { emoji: '💰', label: p.correct, correct: true },
+            ...p.decoys.map(d => ({ emoji: '💰', label: d, correct: false })),
+          ])}
+          onWin={onWin}
+          onFail={onFail}
+        />
+      );
+    },
+    winMsg: () => `Correct! The budget is almost gone, but at least you know exactly how gone.`,
+    failMsg: () => `Wrong number. Finance will send a "friendly reminder" shortly.`,
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // DYSTOPIAN SCENARIO VARIANTS (3 games)
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  {
+    id: 'vpn-watching',
+    instruction: 'THE VPN IS WATCHING!',
+    duration: 7000,
+    category: 'click',
+    weight: 1.5,
+    waitPhase: 'both',
+    render: (onWin) => <ClickTargetGame emoji="⚠️" label="DISMISS WARNING" animation="shake" onWin={onWin} />,
+    winMsg: () => `Warning dismissed. Your browsing has been logged anyway.`,
+    failMsg: () => `Warning expired. IT has flagged your session.`,
+  },
+  {
+    id: 'keystrokes-logged',
+    instruction: 'YOUR KEYSTROKES ARE LOGGED!',
+    duration: 7000,
+    category: 'physical',
+    weight: 1.5,
+    waitPhase: 'both',
+    render: (onWin) => (
+      <RapidClickGame targetClicks={15} emoji="⌨️" label="Type faster! They're watching!" onWin={onWin} />
+    ),
+    winMsg: () => `Typing speed: Acceptable. Productivity score updated.`,
+    failMsg: () => `Below minimum WPM. A performance note has been added.`,
+  },
+  {
+    id: 'camera-cover-detected',
+    instruction: 'CAMERA COVER DETECTED!',
+    duration: 9000,
+    category: 'avoid',
+    weight: 1.5,
+    waitPhase: 'both',
+    survivorGame: true,
+    render: (_onWin, onFail) => (
+      <AvoidGame
+        playerEmoji="🧑‍💻"
+        obstacleEmoji="📷"
+        baseCount={4}
+        baseSpeed={0.9}
+        movementPattern="inward"
+        onFail={onFail}
+      />
+    ),
+    winMsg: () => `Cameras evaded. For now. They'll upgrade the firmware soon.`,
+    failMsg: () => `Caught on camera. Your "engagement score" has been adjusted.`,
   },
 ];

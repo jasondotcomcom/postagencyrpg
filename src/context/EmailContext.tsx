@@ -78,6 +78,8 @@ function emailReducer(state: EmailState, action: EmailAction): EmailState {
       return { ...state, searchQuery: action.payload };
 
     case 'ADD_EMAIL':
+      // Dedup — skip if an email with this ID already exists
+      if (state.emails.some(e => e.id === action.payload.id)) return state;
       return {
         ...state,
         emails: [action.payload, ...state.emails],
@@ -198,10 +200,18 @@ export function EmailProvider({ children }: { children: React.ReactNode }) {
     // Apply sort
     switch (state.sort) {
       case 'date_desc':
-        filtered.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+        filtered.sort((a, b) => {
+          const ta = typeof a.timestamp === 'number' ? a.timestamp : new Date(a.timestamp).getTime();
+          const tb = typeof b.timestamp === 'number' ? b.timestamp : new Date(b.timestamp).getTime();
+          return tb - ta;
+        });
         break;
       case 'date_asc':
-        filtered.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+        filtered.sort((a, b) => {
+          const ta = typeof a.timestamp === 'number' ? a.timestamp : new Date(a.timestamp).getTime();
+          const tb = typeof b.timestamp === 'number' ? b.timestamp : new Date(b.timestamp).getTime();
+          return ta - tb;
+        });
         break;
       case 'sender':
         filtered.sort((a, b) => a.from.name.localeCompare(b.from.name));

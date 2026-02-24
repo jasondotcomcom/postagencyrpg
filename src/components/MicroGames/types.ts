@@ -16,6 +16,8 @@ export interface GameDef {
   waitPhase: WaitPhase | 'both';
   /** If true, surviving the full timer = win (dodge/avoid games) */
   survivorGame?: boolean;
+  /** Selection weight — higher = more likely to be picked (default 1.0) */
+  weight?: number;
   render: (onWin: () => void, onFail: () => void, member: TeamMember) => ReactElement;
   winMsg: (m: TeamMember) => string;
   failMsg: (m: TeamMember) => string;

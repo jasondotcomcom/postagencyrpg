@@ -15,7 +15,17 @@ interface MicroGamesProps {
   onSeeResults?: () => void;
 }
 
-// ─── Game Picker (category-aware, no back-to-back same category) ────────────
+// ─── Weighted Game Picker (category-aware, no back-to-back same category) ───
+
+function weightedPick(pool: GameDef[]): GameDef {
+  const totalWeight = pool.reduce((sum, g) => sum + (g.weight ?? 1.0), 0);
+  let r = Math.random() * totalWeight;
+  for (const g of pool) {
+    r -= g.weight ?? 1.0;
+    if (r <= 0) return g;
+  }
+  return pool[pool.length - 1];
+}
 
 function pickNextGame(
   phase: WaitPhase,
@@ -39,7 +49,7 @@ function pickNextGame(
     pool = ALL_GAMES.filter(g => phaseMatch(g));
   }
 
-  return pool[Math.floor(Math.random() * pool.length)];
+  return weightedPick(pool);
 }
 
 // ─── Main Component ─────────────────────────────────────────────────────────

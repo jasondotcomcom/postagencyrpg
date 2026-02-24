@@ -598,3 +598,161 @@
   border-color: var(--color-mint);
   background: rgba(168, 230, 207, 0.15);
 }
+
+/* ─── Mobile Responsive ──────────────────────────────────────────────────── */
+
+@media (max-width: 767px) {
+  /* Header: stack title and sort */
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 12px 14px 10px;
+    gap: 8px;
+  }
+
+  .headerTitle {
+    font-size: 1rem;
+  }
+
+  .sortControls {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .sortBtn {
+    flex: 1;
+    text-align: center;
+    padding: 8px 6px;
+    min-height: 44px;
+    font-size: 0.8125rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Stats bar: tighter on mobile */
+  .statsBar {
+    padding: 10px 12px;
+  }
+
+  .statValue {
+    font-size: 1rem;
+  }
+
+  .statLabel {
+    font-size: 0.625rem;
+  }
+
+  .statDivider {
+    height: 20px;
+  }
+
+  /* Scroll area */
+  .scrollArea {
+    padding: 12px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .scrollArea::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Single column cards */
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .card {
+    padding: 12px 14px;
+    width: 100%;
+  }
+
+  .cardName {
+    font-size: 0.875rem;
+    line-height: 1.4;
+  }
+
+  .cardConcept {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Detail panel: full width on mobile */
+  .detailOverlay {
+    padding: 8px;
+  }
+
+  .detailPanel {
+    max-width: 100%;
+    padding: 16px;
+    border-radius: 12px;
+    max-height: calc(100% - 16px);
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .detailPanel::-webkit-scrollbar {
+    display: none;
+  }
+
+  .detailClose {
+    width: 36px;
+    height: 36px;
+    min-height: 44px;
+    min-width: 44px;
+    top: 8px;
+    right: 8px;
+    font-size: 1rem;
+  }
+
+  .detailHeader {
+    gap: 10px;
+  }
+
+  .detailName {
+    font-size: 1rem;
+  }
+
+  .detailMeta {
+    padding: 10px 12px;
+  }
+
+  .detailMetaRow {
+    flex-wrap: wrap;
+  }
+
+  .detailFeedback {
+    font-size: 0.8125rem;
+    padding: 8px 10px;
+  }
+
+  /* Action buttons: bigger touch targets */
+  .copyFeedbackButton,
+  .shareHubButton {
+    padding: 8px 12px;
+    min-height: 44px;
+    font-size: 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .detailActions {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .deliverableDesc {
+    white-space: normal;
+  }
+
+  /* Score badge: ensure readability */
+  .scoreBadge {
+    width: 36px;
+    height: 36px;
+    font-size: 0.875rem;
+  }
+}

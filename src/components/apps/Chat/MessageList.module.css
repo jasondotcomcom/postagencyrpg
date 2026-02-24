@@ -112,6 +112,25 @@
   word-wrap: break-word;
 }
 
+/* Image / ASCII art block */
+.messageImage {
+  margin-top: 6px;
+  max-width: 280px;
+}
+
+.messageImage pre {
+  background: #1a1a2e;
+  color: #e0e0e0;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-family: 'SF Mono', 'Fira Code', 'Courier New', monospace;
+  font-size: 0.6875rem;
+  line-height: 1.4;
+  white-space: pre;
+  overflow-x: auto;
+  margin: 0;
+}
+
 /* Reactions */
 .reactions {
   display: flex;
@@ -208,4 +227,37 @@
 .newMessagesButton:hover {
   transform: translateX(-50%) translateY(-2px);
   box-shadow: 0 4px 12px rgba(255, 183, 178, 0.5);
+}
+
+/* ─── Mobile: full-height message list ───────────────────────────────────── */
+@media (max-width: 767px) {
+  .messageList {
+    padding: 12px 0;
+    padding-bottom: 80px; /* clearance for sticky input bar + safe area */
+  }
+
+  .messageRow {
+    padding: 6px 12px;
+  }
+
+  .messageRow:hover {
+    background: transparent; /* disable hover on touch */
+  }
+
+  .messageRow.playerMessage:hover {
+    background: rgba(168, 230, 207, 0.06); /* keep base color, no hover shift */
+  }
+
+  .reactionChip {
+    min-height: 36px;
+    min-width: 36px;
+    padding: 6px 12px;
+  }
+
+  .newMessagesButton {
+    bottom: 12px;
+    min-height: 44px;
+    padding: 10px 20px;
+    font-size: 0.8125rem;
+  }
 }

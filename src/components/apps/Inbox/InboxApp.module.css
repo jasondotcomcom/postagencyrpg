@@ -181,3 +181,102 @@
 .noSelectionHint {
   font-size: 0.8125rem;
 }
+
+/* Desktop: hide mobile-only back button */
+.mobileBackButton {
+  display: none;
+}
+
+/* ─── Mobile: list / detail toggle ───────────────────────────────────────── */
+@media (max-width: 767px) {
+  .inboxApp {
+    border-radius: 0;
+  }
+
+  /* Default: sidebar (list) takes full width, detail hidden */
+  .sidebar {
+    width: 100%;
+    min-width: 0;
+    border-right: none;
+  }
+
+  .detailPane {
+    display: none;
+  }
+
+  /* When an email is selected, swap: hide list, show detail full-width */
+  .inboxApp.mobileDetailActive .sidebar {
+    display: none;
+  }
+
+  .inboxApp.mobileDetailActive .detailPane {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    min-height: 0;
+  }
+
+  /* Mobile back button shown in detail view */
+  .mobileBackButton {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 10px 12px;
+    border: none;
+    background: rgba(254, 249, 243, 0.8);
+    border-bottom: 1px solid rgba(168, 230, 207, 0.2);
+    font-family: inherit;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-mint-dark, #3d8b6e);
+    cursor: pointer;
+    flex-shrink: 0;
+    min-height: 44px;
+  }
+
+  .mobileBackButton svg {
+    flex-shrink: 0;
+  }
+
+  /* Full-width filter tabs with horizontal scroll */
+  .filterTabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding: 10px 12px;
+  }
+
+  .filterTabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .filterTab {
+    min-height: 44px;
+    padding: 8px 14px;
+    font-size: 0.75rem;
+  }
+
+  .composeButton {
+    display: none;
+  }
+
+  .sidebarHeader {
+    padding: 12px;
+  }
+
+  .searchInput {
+    font-size: 16px; /* prevents iOS zoom */
+  }
+
+  .emailList {
+    padding: 4px 8px;
+    padding-bottom: 80px; /* clearance for dock + safe area */
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .noSelection {
+    display: none;
+  }
+}

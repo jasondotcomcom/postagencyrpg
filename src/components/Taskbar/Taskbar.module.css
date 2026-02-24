@@ -38,8 +38,10 @@
   box-shadow: 0 4px 16px rgba(168, 230, 207, 0.5);
 }
 
-.startButton:active {
+.startButton:active,
+.startButtonActive {
   transform: translateY(0) scale(0.98);
+  box-shadow: 0 1px 4px rgba(154, 176, 176, 0.3) inset;
 }
 
 .startLogo {
@@ -97,6 +99,13 @@
   text-transform: uppercase;
   cursor: default;
   user-select: none;
+}
+
+/* ─── Mobile: hide desktop taskbar (mobile uses MobileDock) ─────────────── */
+@media (max-width: 767px) {
+  .taskbar {
+    display: none;
+  }
 }
 
 /* ─── Dark Theme ─────────────────────────────────────────────────────────── */

@@ -323,3 +323,125 @@
 .saveBtnSaved {
   background: linear-gradient(135deg, var(--color-mint-dark), var(--color-mint));
 }
+
+/* ─── Mobile Responsive ──────────────────────────────────────────────────── */
+
+@media (max-width: 767px) {
+  /* Scroll area: tighter padding */
+  .scrollArea {
+    padding: 14px 12px 8px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .scrollArea::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Section headers */
+  .sectionHeader {
+    padding: 12px 0 6px;
+    font-size: 0.6875rem;
+  }
+
+  .subHeader {
+    padding: 8px 2px 4px;
+    font-size: 0.8125rem;
+  }
+
+  /* Cards: full width */
+  .card {
+    border-radius: 10px;
+  }
+
+  /* Toggle rows: 44px touch targets */
+  .toggleRow {
+    padding: 12px 14px;
+    gap: 12px;
+    min-height: 44px;
+  }
+
+  .toggleLabel {
+    font-size: 0.875rem;
+  }
+
+  .toggleDesc {
+    font-size: 0.6875rem;
+    line-height: 1.35;
+  }
+
+  .toggleInfo {
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  /* Larger checkbox for touch */
+  .checkboxCustom {
+    width: 26px;
+    height: 26px;
+    border-radius: 7px;
+  }
+
+  .checkmark {
+    font-size: 0.875rem;
+  }
+
+  /* Slider row */
+  .sliderRow {
+    padding: 10px 14px 14px;
+  }
+
+  .slider::-webkit-slider-thumb {
+    width: 24px;
+    height: 24px;
+  }
+
+  .slider::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+  }
+
+  .slider {
+    height: 8px;
+  }
+
+  /* Select row */
+  .selectRow {
+    padding: 12px 14px;
+    min-height: 44px;
+  }
+
+  .select {
+    min-height: 36px;
+    font-size: 0.875rem;
+    padding: 6px 30px 6px 10px;
+  }
+
+  /* Divider */
+  .divider {
+    margin: 0 14px;
+  }
+
+  /* Footer: full width buttons */
+  .footer {
+    padding: 12px 14px;
+    gap: 8px;
+  }
+
+  .resetBtn {
+    padding: 10px 14px;
+    min-height: 44px;
+    font-size: 0.8125rem;
+  }
+
+  .saveBtn {
+    padding: 10px 20px;
+    min-height: 44px;
+    font-size: 0.8125rem;
+  }
+
+  /* Tag */
+  .tag {
+    font-size: 0.5625rem;
+  }
+}

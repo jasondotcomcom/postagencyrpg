@@ -1258,3 +1258,153 @@ export function SpinBuildGame({
     </div>
   );
 }
+
+// ─── 18. Typo Find ───────────────────────────────────────────────────────────
+
+export function TypoFindGame({
+  words, typoIndex, onWin, onFail,
+}: {
+  words: string[]; typoIndex: number;
+  onWin: (meta?: { elapsedMs?: number }) => void;
+  onFail: (meta?: { wrongPicks?: number }) => void;
+}) {
+  const [picked, setPicked] = useState<number | null>(null);
+  const startTimeRef = useRef(Date.now());
+
+  const handleClick = (idx: number) => {
+    if (picked !== null) return;
+    setPicked(idx);
+    if (idx === typoIndex) {
+      setTimeout(() => onWin({ elapsedMs: Date.now() - startTimeRef.current }), 400);
+    } else {
+      setTimeout(() => onFail({ wrongPicks: 1 }), 400);
+    }
+  };
+
+  return (
+    <div className={styles.typoWrap}>
+      {words.map((word, i) => (
+        <span
+          key={i}
+          className={`${styles.typoWord} ${
+            picked === i
+              ? i === typoIndex ? styles.typoCorrect : styles.typoWrong
+              : picked !== null && i === typoIndex ? styles.typoCorrect : ''
+          }`}
+          onClick={() => handleClick(i)}
+        >
+          {word}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+// ─── 19. Spot Difference ─────────────────────────────────────────────────────
+
+interface SpotPanel { emoji: string; lines: string[] }
+
+export function SpotDifferenceGame({
+  panelA, panelB, errorPanel, onWin, onFail,
+}: {
+  panelA: SpotPanel; panelB: SpotPanel; errorPanel: 'A' | 'B';
+  onWin: (meta?: { elapsedMs?: number }) => void;
+  onFail: (meta?: { wrongPicks?: number }) => void;
+}) {
+  const [picked, setPicked] = useState<'A' | 'B' | null>(null);
+  const startTimeRef = useRef(Date.now());
+
+  const handleClick = (panel: 'A' | 'B') => {
+    if (picked !== null) return;
+    setPicked(panel);
+    if (panel === errorPanel) {
+      setTimeout(() => onWin({ elapsedMs: Date.now() - startTimeRef.current }), 500);
+    } else {
+      setTimeout(() => onFail({ wrongPicks: 1 }), 500);
+    }
+  };
+
+  const renderPanel = (panel: SpotPanel, id: 'A' | 'B') => (
+    <div
+      className={`${styles.spotPanel} ${
+        picked === id
+          ? id === errorPanel ? styles.spotCorrect : styles.spotWrong
+          : ''
+      }`}
+      onClick={() => handleClick(id)}
+    >
+      <div className={styles.spotEmoji}>{panel.emoji}</div>
+      {panel.lines.map((line, i) => (
+        <div key={i} className={styles.spotLine}>{line}</div>
+      ))}
+    </div>
+  );
+
+  return (
+    <div className={styles.spotWrap}>
+      {renderPanel(panelA, 'A')}
+      {renderPanel(panelB, 'B')}
+    </div>
+  );
+}
+
+// ─── 20. Swipe Game ──────────────────────────────────────────────────────────
+
+interface SwipeItem { emoji: string; label: string; correct: 'left' | 'right' }
+
+export function SwipeGame({
+  items, leftLabel, rightLabel, onWin, onFail,
+}: {
+  items: SwipeItem[];
+  leftLabel?: string; rightLabel?: string;
+  onWin: () => void;
+  onFail: (meta?: { wrongPicks?: number }) => void;
+}) {
+  const [currentIdx, setCurrentIdx] = useState(0);
+  const [exitDir, setExitDir] = useState<'left' | 'right' | null>(null);
+  const resolvedRef = useRef(false);
+  const wrongRef = useRef(0);
+
+  const handleSwipe = useCallback((dir: 'left' | 'right') => {
+    if (resolvedRef.current || currentIdx >= items.length) return;
+    const item = items[currentIdx];
+    setExitDir(dir);
+    if (dir !== item.correct) {
+      resolvedRef.current = true;
+      wrongRef.current += 1;
+      setTimeout(() => onFail({ wrongPicks: wrongRef.current }), 400);
+      return;
+    }
+    setTimeout(() => {
+      setExitDir(null);
+      const next = currentIdx + 1;
+      if (next >= items.length) {
+        resolvedRef.current = true;
+        onWin();
+      } else {
+        setCurrentIdx(next);
+      }
+    }, 300);
+  }, [currentIdx, items, onWin, onFail]);
+
+  const item = items[currentIdx];
+  if (!item) return null;
+
+  return (
+    <div className={styles.swipeWrap}>
+      <div className={styles.swipeProgress}>{currentIdx + 1} / {items.length}</div>
+      <div className={`${styles.swipeCard} ${exitDir === 'left' ? styles.swipeExitLeft : exitDir === 'right' ? styles.swipeExitRight : ''}`}>
+        <span className={styles.swipeEmoji}>{item.emoji}</span>
+        <span className={styles.swipeLabel}>{item.label}</span>
+      </div>
+      <div className={styles.swipeBtns}>
+        <button className={`${styles.swipeBtn} ${styles.swipeLeft}`} onClick={() => handleSwipe('left')}>
+          {leftLabel || 'Nope'}
+        </button>
+        <button className={`${styles.swipeBtn} ${styles.swipeRight}`} onClick={() => handleSwipe('right')}>
+          {rightLabel || 'Yes'}
+        </button>
+      </div>
+    </div>
+  );
+}

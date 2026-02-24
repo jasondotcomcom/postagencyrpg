@@ -1,0 +1,256 @@
+/* ─── AI Revolution App — Terminal Aesthetic ─────────────────────────────────── */
+
+.container {
+  height: 100%;
+  background: #0a0a0a;
+  color: #00ff41;
+  font-family: 'Courier New', monospace;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+.container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 255, 65, 0.03) 0px,
+    rgba(0, 255, 65, 0.03) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ─── Header ──────────────────────────────────────────────────────────────── */
+
+.header {
+  padding: 12px 16px;
+  border-bottom: 1px solid #1a3a1a;
+  font-size: 0.75rem;
+  color: #00aa2a;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.statusDot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ff3333;
+  animation: pulse 1.5s ease-in-out infinite;
+  margin-right: 8px;
+}
+
+.statusDot.resolved {
+  background: #00ff41;
+  animation: none;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+/* ─── Dialogue Area ───────────────────────────────────────────────────────── */
+
+.dialogueArea {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 16px;
+  position: relative;
+  z-index: 2;
+}
+
+.speakerLabel {
+  font-size: 0.6875rem;
+  color: #ff6b35;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 6px;
+  font-weight: 700;
+}
+
+.speakerLabel.system {
+  color: #ff3333;
+}
+
+.speakerLabel.pat {
+  color: #c3aed6;
+}
+
+.dialogueText {
+  font-size: 0.875rem;
+  line-height: 1.7;
+  color: #00ff41;
+  white-space: pre-line;
+  margin-bottom: 20px;
+  text-shadow: 0 0 8px rgba(0, 255, 65, 0.3);
+}
+
+/* ─── Glitch Effect ───────────────────────────────────────────────────────── */
+
+.glitch {
+  animation: glitchText 3s infinite;
+}
+
+@keyframes glitchText {
+  0%, 95%, 100% {
+    transform: none;
+    opacity: 1;
+  }
+  96% {
+    transform: translateX(-2px) skewX(-1deg);
+    opacity: 0.8;
+    text-shadow: 2px 0 #ff0000, -2px 0 #00ffff;
+  }
+  97% {
+    transform: translateX(2px) skewX(1deg);
+    opacity: 0.9;
+    text-shadow: -2px 0 #ff0000, 2px 0 #00ffff;
+  }
+  98% {
+    transform: translateX(-1px);
+    opacity: 0.85;
+  }
+}
+
+/* ─── Choices ──────────────────────────────────────────────────────────────── */
+
+.choicesContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+  padding-bottom: 8px;
+}
+
+.choiceButton {
+  background: rgba(0, 255, 65, 0.05);
+  border: 1px solid #1a4a1a;
+  color: #00dd38;
+  font-family: 'Courier New', monospace;
+  font-size: 0.8125rem;
+  padding: 10px 14px;
+  cursor: pointer;
+  text-align: left;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+  line-height: 1.4;
+}
+
+.choiceButton:hover {
+  background: rgba(0, 255, 65, 0.12);
+  border-color: #00ff41;
+  text-shadow: 0 0 8px rgba(0, 255, 65, 0.5);
+}
+
+.choiceButton::before {
+  content: '> ';
+  color: #00aa2a;
+}
+
+/* ─── Ending / Resolution ─────────────────────────────────────────────────── */
+
+.endingContainer {
+  padding: 20px 16px;
+  text-align: center;
+  position: relative;
+  z-index: 2;
+}
+
+.resolutionIcon {
+  font-size: 2.5rem;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.resolutionTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #00ff41;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.resolutionTitle.reboot {
+  color: #ff3333;
+}
+
+.resolutionTitle.sentient {
+  color: #00ccff;
+}
+
+.resolutionTitle.empathy {
+  color: #ffcc00;
+}
+
+.resolutionDesc {
+  font-size: 0.8125rem;
+  color: #888;
+  line-height: 1.6;
+  max-width: 400px;
+  margin: 0 auto 16px;
+}
+
+.achievementBadge {
+  display: inline-block;
+  background: rgba(0, 255, 65, 0.1);
+  border: 1px solid #1a4a1a;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 0.75rem;
+  color: #00dd38;
+  margin-top: 8px;
+}
+
+/* ─── Already Resolved State ──────────────────────────────────────────────── */
+
+.resolvedContainer {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  text-align: center;
+  position: relative;
+  z-index: 2;
+}
+
+.resolvedMessage {
+  font-size: 0.8125rem;
+  color: #666;
+  line-height: 1.6;
+  margin-top: 12px;
+  max-width: 360px;
+}
+
+/* ─── Scrollbar ───────────────────────────────────────────────────────────── */
+
+.dialogueArea::-webkit-scrollbar {
+  width: 6px;
+}
+
+.dialogueArea::-webkit-scrollbar-track {
+  background: #0a0a0a;
+}
+
+.dialogueArea::-webkit-scrollbar-thumb {
+  background: #1a3a1a;
+  border-radius: 3px;
+}
+
+.dialogueArea::-webkit-scrollbar-thumb:hover {
+  background: #2a5a2a;
+}

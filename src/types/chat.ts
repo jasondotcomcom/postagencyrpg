@@ -1,6 +1,6 @@
 // ─── Channel Types ────────────────────────────────────────────────────────────
 
-export type ChannelId = 'general' | 'creative' | 'random';
+export type ChannelId = 'general' | 'creative' | 'random' | 'food' | 'memes' | 'haiku';
 
 export interface Channel {
   id: ChannelId;
@@ -22,6 +22,7 @@ export interface ChatMessage {
   channel: ChannelId;
   authorId: string;
   text: string;
+  imageUrl?: string;
   timestamp: number;
   reactions: ChatReaction[];
   isRead: boolean;
@@ -29,7 +30,7 @@ export interface ChatMessage {
 
 // ─── Morale ───────────────────────────────────────────────────────────────────
 
-export type MoraleLevel = 'high' | 'medium' | 'low';
+export type MoraleLevel = 'high' | 'medium' | 'low' | 'toxic' | 'mutiny';
 
 // ─── Campaign Event Types ─────────────────────────────────────────────────────
 

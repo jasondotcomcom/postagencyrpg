@@ -1,0 +1,291 @@
+/* ============================================================================
+   Mobile Notifications -- Toast Banners & Notification Drawer
+   ============================================================================ */
+
+/* --- Toast Banner -------------------------------------------------------- */
+
+.toastWrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  padding-top: calc(env(safe-area-inset-top, 0px) + 48px);
+  padding-left: 8px;
+  padding-right: 8px;
+  pointer-events: none;
+}
+
+.toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: rgba(30, 30, 50, 0.88);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-radius: 14px;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    0 1px 0 rgba(255, 255, 255, 0.06) inset;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: pan-y;
+  will-change: transform, opacity;
+  transform: translateY(-120%);
+  opacity: 0;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+              opacity 0.3s ease;
+}
+
+.toastVisible {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.toastDismissing {
+  transform: translateY(-120%);
+  opacity: 0;
+  transition: transform 0.25s cubic-bezier(0.55, 0, 1, 0.45),
+              opacity 0.2s ease;
+}
+
+.toastIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 18px;
+}
+
+.toastIcon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.toastBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.toastTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.toastMessage {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+}
+
+/* --- Reduced motion ------------------------------------------------------ */
+
+@media (prefers-reduced-motion: reduce) {
+  .toast,
+  .toastDismissing {
+    transition: opacity 0.15s ease;
+    transform: none;
+  }
+
+  .toastVisible {
+    transform: none;
+  }
+
+  .toastDismissing {
+    transform: none;
+  }
+
+  .drawerPanel,
+  .drawerPanelOpen {
+    transition: opacity 0.15s ease;
+  }
+
+  .notifCard {
+    transition: opacity 0.15s ease;
+  }
+
+  .notifCardDismissing {
+    transition: opacity 0.15s ease;
+  }
+}
+
+/* --- Notification Drawer ------------------------------------------------- */
+
+.drawerOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 150;
+  background: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.drawerOverlayVisible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.drawerPanel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 160;
+  max-height: 80vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-top: calc(env(safe-area-inset-top, 0px) + 48px);
+  padding-bottom: 16px;
+  padding-left: 12px;
+  padding-right: 12px;
+  background: rgba(20, 20, 40, 0.92);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+  transform: translateY(-100%);
+  opacity: 0;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+              opacity 0.3s ease;
+  will-change: transform, opacity;
+}
+
+.drawerPanel::-webkit-scrollbar {
+  display: none;
+}
+
+.drawerPanelOpen {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.drawerHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 4px 12px;
+}
+
+.drawerTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.drawerClearBtn {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 12px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  border-radius: 8px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+
+.drawerClearBtn:active {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.drawerEmpty {
+  text-align: center;
+  padding: 32px 16px;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 14px;
+}
+
+/* --- Notification Card --------------------------------------------------- */
+
+.notifCard {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: pan-x;
+  will-change: transform, opacity;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  overflow: hidden;
+  position: relative;
+}
+
+.notifCard:active {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.notifCardDismissing {
+  transform: translateX(100%);
+  opacity: 0;
+  transition: transform 0.3s cubic-bezier(0.55, 0, 1, 0.45),
+              opacity 0.2s ease;
+}
+
+.notifCardIcon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.04));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 16px;
+}
+
+.notifCardIcon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.notifCardBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.notifCardTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.notifCardMessage {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.55);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+}
+
+.notifCardTime {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.35);
+  flex-shrink: 0;
+  margin-top: 1px;
+}

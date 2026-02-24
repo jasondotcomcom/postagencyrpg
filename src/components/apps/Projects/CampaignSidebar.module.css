@@ -187,3 +187,27 @@
   color: var(--text-dark);
   text-align: center;
 }
+
+/* ─── Mobile: full-width scrollable card list ────────────────────────────── */
+@media (max-width: 767px) {
+  .sidebar {
+    width: 100%;
+    min-width: 0;
+    border-right: none;
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  /* Hide sidebar when workspace is shown (controlled by parent class) */
+  :global(.mobileWorkspaceActive) .sidebar {
+    display: none;
+  }
+
+  .campaignCard {
+    min-height: 44px;
+  }
+
+  .header {
+    padding: 12px 16px;
+  }
+}

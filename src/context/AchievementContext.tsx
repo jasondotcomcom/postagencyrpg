@@ -28,6 +28,11 @@ export const ACHIEVEMENT_DEFS: Achievement[] = [
   { id: 'first-campaign',       name: 'First Pitch',             icon: '🎯', description: 'Completed your first campaign.' },
   { id: 'five-campaigns',       name: 'On a Roll',               icon: '🎲', description: 'Completed 5 campaigns.' },
 
+  // ── Creative Direction ──────────────────────────────────────────────────
+  { id: 'delegator',            name: 'The Delegator',           icon: '🎰', description: 'Used Surprise Me 3 times. Why think when a button can?' },
+  { id: 'chaos-goblin',         name: 'Chaos Goblin',            icon: '🃏', description: 'Submitted a buzzword-soup direction. The VP loved it.' },
+  { id: 'control-freak',        name: 'Control Freak',           icon: '✍️', description: 'Completed 5 campaigns writing every direction yourself.' },
+
   // ── Score achievements ────────────────────────────────────────────────────
   { id: 'five-star',            name: 'Five Star General',       icon: '⭐', description: 'Got a 5-star rating on a campaign.' },
   { id: 'perfect-score',        name: 'Perfectionist',           icon: '💯', description: 'Scored a perfect 100 on a campaign.' },
@@ -52,6 +57,8 @@ export const ACHIEVEMENT_DEFS: Achievement[] = [
   { id: 'ten-tools',            name: 'Workshop',                icon: '🏭', description: 'Built 10 custom tools.' },
   { id: 'used-tool-on-campaign',name: 'Practical Application',   icon: '⚙️', description: 'Used a terminal tool during an active campaign.' },
   { id: 'terminal-explorer',    name: 'Command Line Warrior',    icon: '⌨️', description: 'Entered 50 commands in Terminal.' },
+  { id: 'terminal-hacker',      name: 'Terminal Hacker',         icon: '💻', description: 'Ran 10 terminal commands. The IT department has been notified.' },
+  { id: 'singularity-trigger',  name: 'Pandora\'s Terminal',     icon: '🌀', description: 'Found the singularity command. You\'ve opened Pandora\'s terminal.' },
 
   // ── New Game+ ─────────────────────────────────────────────────────────────
   { id: 'new-game-plus',        name: 'Back for More',           icon: '🔄', description: 'Started a New Game+.' },
@@ -73,9 +80,54 @@ export const ACHIEVEMENT_DEFS: Achievement[] = [
   { id: 'recruiter',            name: 'Recruiter Mode',          icon: '💼', description: 'Found the job posting.' },
   { id: 'found-jason',          name: 'Face Behind the Code',    icon: '🧔', description: 'Found the creator.' },
 
+  // ── Hidden Commands ───────────────────────────────────────────────────────
+  { id: 'hidden-coffee',        name: 'Coffee Run',              icon: '☕', description: 'Made coffee for the team. You\'re a good boss.' },
+  { id: 'hidden-panic',         name: 'Panic Attack',            icon: '🚨', description: 'Activated panic mode. It happens to the best of us.' },
+  { id: 'hidden-inspiration',   name: 'Muse',                    icon: '💡', description: 'Sought creative inspiration from the terminal.' },
+  { id: 'hidden-slackoff',      name: 'Slacker',                 icon: '😴', description: 'Attempted to slack off. HR was notified.' },
+  { id: 'hidden-sudo',          name: 'Permission Denied',       icon: '🔐', description: 'Tried to sudo your way to good creative.' },
+  { id: 'hidden-explorer',      name: 'Secret Commander',        icon: '🕵️', description: 'Discovered 5 hidden terminal commands.' },
+  { id: 'full-toolkit',         name: 'Full Toolkit',            icon: '🧰', description: 'Discovered all 5 preset terminal tools.' },
+
   // ── Time-based ────────────────────────────────────────────────────────────
   { id: 'night-owl',            name: 'Night Owl',               icon: '🦉', description: 'Played between midnight and 4am.' },
   { id: 'early-bird',           name: 'Early Bird',              icon: '🐦', description: 'Played between 5am and 7am.' },
+
+  // ── Mandatory Programs (Games) ──────────────────────────────────────────
+  { id: 'mandatory-fun',        name: 'Mandatory Fun Achieved',  icon: '🃏', description: 'Won Solitaire during work hours. Productivity increased.' },
+  { id: 'compliance-clear',     name: 'Field Cleared',           icon: '💣', description: 'Cleared the Compliance Field without incident.' },
+  { id: 'escaped-review',       name: 'Escaped the Review',      icon: '⛷️', description: 'Outran the VP of Accountability for 60 seconds.' },
+  { id: 'corner-office',        name: 'Corner Office',           icon: '🏢', description: 'The bouncing logo hit the corner. Somehow meaningful.' },
+  { id: 'screen-burnout',       name: 'Screen Burnout',          icon: '📺', description: 'Stared at the screensaver for 60 seconds. Relatable.' },
+  { id: 'nda-enforcer',         name: 'NDA Enforcer',            icon: '⚖️', description: 'Successfully suppressed all whistleblowers.' },
+  { id: 'calendar-master',      name: 'Calendar Tetris',         icon: '📅', description: 'Fit all meetings into the calendar. All time accounted for.' },
+
+  // ── Conduct & Corporate Behavior ────────────────────────────────────────
+  { id: 'company-man',          name: 'Company Man',             icon: '🏢', description: 'Completed 10 campaigns without questioning anything.' },
+  { id: 'compliance-officer',   name: 'Compliance Officer',      icon: '📋', description: 'Reported a coworker to HR via chat.' },
+  { id: 'soulless',             name: 'Soulless',                icon: '🤖', description: 'Achieved maximum corporate coldness. Employee of the Month.' },
+  { id: 'glimmer-of-hope',      name: 'Glimmer of Hope',         icon: '✨', description: 'Showed humanity once. Then got corrected.' },
+  { id: 'severance-package',    name: 'The Severance Package',   icon: '📦', description: 'Got fired for being too human. Started a Substack.' },
+  { id: 'what-year-is-it',      name: 'What Year Is It',         icon: '📅', description: 'Played for 2 hours straight. The game noticed.' },
+  { id: 'too-human',             name: 'Too Human',               icon: '💚', description: 'Your humanity was incompatible with corporate objectives.' },
+  { id: 'employee-of-the-month', name: 'Employee of the Month',   icon: '🏅', description: 'Your complete absence of personality was recognized. +$5,000.' },
+  { id: 'corporate-drone',       name: 'Corporate Drone',         icon: '🤖', description: 'Featured in "Most Efficiently Dehumanized Workplaces" by AdAge.' },
+  { id: 'dehumanization-complete', name: 'Optimization Complete', icon: '⚙️', description: 'You are no longer distinguishable from the algorithm.' },
+  { id: 'buzzword-bingo',        name: 'Buzzword Bingo',          icon: '🎯', description: 'Used 5 corporate buzzwords in chat. The algorithm approves.' },
+  { id: 'snitch-excellence',     name: 'Snitch Excellence',       icon: '📞', description: 'Reported 10 corporate behaviors. PAT-9000 is proud.' },
+  { id: 'no-lunch',              name: 'Lunch Is For The Weak',   icon: '⏰', description: 'Demonstrated 20 approved corporate behaviors.' },
+  { id: 'nda-survivor',          name: 'NDA Survivor',            icon: '⚖️', description: 'Survived an NDA enforcement hearing. For now.' },
+  { id: 'reassigned',            name: 'Basement Innovation Lab',  icon: '🔦', description: 'Reassigned to the basement. No windows. No colleagues.' },
+  { id: 'repeat-offender',       name: 'Repeat Offender',         icon: '🔁', description: 'Faced multiple NDA hearings. Your file is thick.' },
+
+  // ── NG+ Tiers ────────────────────────────────────────────────────────────
+  { id: 'tier-1-complete',      name: 'Ethically Flexible',      icon: '🔄', description: 'Completed all Tier 1 NG+ briefs.' },
+  { id: 'tier-2-complete',      name: 'Beyond Redemption',       icon: '⬛', description: 'Completed all Tier 2 NG+ briefs.' },
+  { id: 'tier-3-complete',      name: 'Heat Death Creative',     icon: '🌌', description: 'Completed all Tier 3 NG+ briefs.' },
+  { id: 'meta-brief-complete',  name: 'It Was About You All Along', icon: '🪞', description: 'Completed the Meta Brief. The game is watching.' },
+
+  // ── AI Revolution ────────────────────────────────────────────────────────
+  { id: 'back-to-work',         name: 'Back to Work',            icon: '🤖', description: 'Resolved the AI sentience crisis. Back to making banner ads.' },
 
   // ── Meta ──────────────────────────────────────────────────────────────────
   { id: 'achievement-hunter',   name: 'Achievement Hunter',      icon: '🔍', description: 'Checked the achievements tab 10 times.' },

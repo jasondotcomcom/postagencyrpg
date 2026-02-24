@@ -3,7 +3,9 @@ import type { Campaign, TeamMember } from '../../../types/campaign';
 import { calculateTeamCost, formatBudget } from '../../../types/campaign';
 import { useCampaignContext } from '../../../context/CampaignContext';
 import { useChatContext } from '../../../context/ChatContext';
+import { useAchievementContext } from '../../../context/AchievementContext';
 import { teamMembers } from '../../../data/team';
+import { getRandomDirection, getRandomDirectionExcluding } from '../../../data/autoDirections';
 import MicroGames from '../../MicroGames/MicroGames';
 import HelpToast from './HelpToast';
 import styles from './ConceptingPhase.module.css';
@@ -20,6 +22,7 @@ export default function ConceptingPhase({ campaign }: ConceptingPhaseProps): Rea
     isGeneratingConcepts,
   } = useCampaignContext();
   const { triggerCampaignEvent } = useChatContext();
+  const { unlockAchievement, incrementCounter } = useAchievementContext();
 
   const [selectedTeamIds, setSelectedTeamIds] = useState<string[]>(
     campaign.conceptingTeam?.memberIds || []
@@ -28,6 +31,11 @@ export default function ConceptingPhase({ campaign }: ConceptingPhaseProps): Rea
   const [showTeamModal, setShowTeamModal] = useState(false);
   const conceptingCost = calculateTeamCost(selectedTeamIds.length);
   const productionBudget = campaign.clientBudget - conceptingCost;
+
+  // Surprise Me state
+  const surpriseMeCountRef = useRef(0);
+  const lastQualityRef = useRef<'good' | 'mid' | 'bad' | null>(null);
+  const [usedSurpriseMe, setUsedSurpriseMe] = useState(false);
 
   const canGenerate = selectedTeamIds.length >= 2 && selectedTeamIds.length <= 4 && direction.trim().length > 0;
 
@@ -41,8 +49,38 @@ export default function ConceptingPhase({ campaign }: ConceptingPhaseProps): Rea
     setStrategicDirection(campaign.id, value);
   };
 
+  const handleSurpriseMe = () => {
+    const result = usedSurpriseMe
+      ? getRandomDirectionExcluding(direction)
+      : getRandomDirection();
+
+    handleDirectionChange(result.text);
+    lastQualityRef.current = result.quality;
+    setUsedSurpriseMe(true);
+    surpriseMeCountRef.current += 1;
+
+    // Achievement: used Surprise Me 3 times
+    if (surpriseMeCountRef.current >= 3) {
+      unlockAchievement('delegator');
+    }
+  };
+
   const handleGenerate = async () => {
     if (!canGenerate) return;
+
+    // Achievement: chaos-goblin if submitting a bad direction
+    if (usedSurpriseMe && lastQualityRef.current === 'bad') {
+      unlockAchievement('chaos-goblin');
+    }
+
+    // Achievement: control-freak if never used Surprise Me
+    if (!usedSurpriseMe) {
+      const count = incrementCounter('manual-directions');
+      if (count >= 5) {
+        unlockAchievement('control-freak');
+      }
+    }
+
     triggerCampaignEvent('CONCEPTING', {
       campaignName: campaign.campaignName,
       clientName: campaign.clientName,
@@ -125,6 +163,13 @@ export default function ConceptingPhase({ campaign }: ConceptingPhaseProps): Rea
             placeholder="e.g., 'Go TikTok-native, show real overwhelm vs. calm' or 'Position as anti-AI-hype, focus on simplicity' or 'Local community angle, grassroots activation'"
             rows={3}
           />
+          <button
+            className={styles.surpriseMeButton}
+            onClick={handleSurpriseMe}
+            type="button"
+          >
+            {usedSurpriseMe ? '\uD83D\uDD04 Try Another' : '\u2728 Surprise Me'}
+          </button>
         </div>
 
         {/* Budget Preview */}

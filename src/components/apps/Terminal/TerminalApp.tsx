@@ -9,7 +9,10 @@ import { usePortfolioContext, type PortfolioEntry } from '../../../context/Portf
 import { useCheatContext } from '../../../context/CheatContext';
 import { useAchievementContext } from '../../../context/AchievementContext';
 import { useEmailContext } from '../../../context/EmailContext';
+import { useConductContext } from '../../../context/ConductContext';
+import { useAIRevolutionContext } from '../../../context/AIRevolutionContext';
 import { AWARD_DEFS } from '../../../data/awards';
+import { ACHIEVEMENT_DEFS } from '../../../context/AchievementContext';
 import { teamMembers } from '../../../data/team';
 import { formatBudget } from '../../../types/campaign';
 import styles from './TerminalApp.module.css';
@@ -68,14 +71,25 @@ const BANNER_LINES: Array<[LineType, string]> = [
 
 const HELP_TEXT = `OmniPubDent IT Terminal — Authorized Commands Only
 
+  ── STATUS & INTEL ─────────────────────────────────
   help                  Show this message (IT Policy 7.3.2)
-  status                Agency status (read-only)
+  status                Agency status overview (funds, rep, morale)
   brief                 Current project brief (read-only)
   team                  Current team roster (read-only)
+  campaigns             Campaign overview & stats
+  deadlines             Show active campaign deadlines
+  roster                Show team assignments & morale
+  morale                Current team morale diagnostic
+  achievements          View unlocked achievement progress
+  conduct               View corporate conduct score & risk level
+
+  ── TOOLS ──────────────────────────────────────────
   list                  List your approved tools
   build [description]   Request tool build (subject to approval)
   run [name]            Execute approved tool
   delete [name]         Delete tool (requires manager sign-off)
+
+  ── SYSTEM ─────────────────────────────────────────
   clear                 Clear terminal output
   voluntary-separation  Initiate resource offboarding (irreversible)
 
@@ -194,6 +208,311 @@ const PRESET_TOOLS: AgencyTool[] = [
     createdAt: Date.now(),
   },
 ];
+
+// ─── Industry inference from brief text ───────────────────────────────────────
+
+function inferIndustry(clientName: string, challenge: string, message: string): string {
+  const text = `${clientName} ${challenge} ${message}`.toLowerCase();
+  if (/coffee|brew|café|cafe|food|restaurant|beverage|drink|snack|culinary|bakery|organic/.test(text)) return 'food-beverage';
+  if (/fashion|apparel|clothing|style|wear|designer|textile|boutique/.test(text)) return 'fashion';
+  if (/music|band|album|concert|streaming|playlist|label|audio/.test(text)) return 'music';
+  if (/film|movie|show|entertainment|streaming|studio|cinema|media/.test(text)) return 'entertainment';
+  if (/pet|animal|veterinary|dog|cat/.test(text)) return 'pet-tech';
+  if (/nonprofit|charity|foundation|cause|social impact|donate/.test(text)) return 'nonprofit';
+  if (/saas|software|platform|subscription|b2b|enterprise|cloud/.test(text)) return 'saas';
+  if (/luxury|premium|exclusive|high-end|bespoke|artisan/.test(text)) return 'luxury';
+  if (/space|aerospace|rocket|satellite|orbit/.test(text)) return 'aerospace';
+  if (/ai |artificial intelligence|machine learning|neural|robot/.test(text)) return 'ai-advocacy';
+  if (/tech|app|digital|startup|innovation|device|gadget|smart/.test(text)) return 'tech';
+  return 'corporate';
+}
+
+// ─── Competitive intel data ──────────────────────────────────────────────────
+
+const COMPETITOR_MAP: Record<string, { competitors: string[]; whitespace: string }> = {
+  'food-beverage': {
+    competitors: [
+      'BrewCraft Collective — premium positioning, "farm-to-cup" narrative, heavy influencer spend',
+      'Nourish & Co. — health-forward branding, clean label messaging, Gen Z focus',
+      'Golden Grain Distillers — heritage storytelling, "since 1892" nostalgia play',
+    ],
+    whitespace: '"Everyday indulgence" — accessible luxury without the pretension',
+  },
+  'tech': {
+    competitors: [
+      'NovaByte Labs — "innovation first" messaging, sterile blue branding, enterprise focus',
+      'PulsePoint Digital — disruption narrative, VC-funded hype machine, influencer-heavy',
+      'Circuitry Systems — B2B reliability play, "trusted by Fortune 500" positioning',
+    ],
+    whitespace: '"Human-first tech" — warmth and personality in a category full of cold futurism',
+  },
+  'fashion': {
+    competitors: [
+      'ThreadLine Studios — sustainable fashion pioneer, Gen Z darling, TikTok-native',
+      'Maison Éclat — old-world luxury codes, exclusivity-driven, limited drops',
+    ],
+    whitespace: '"Timeless utility" — fashion that works as hard as you do',
+  },
+  'music': {
+    competitors: [
+      'SoundVault Records — algorithm-driven discovery, playlist placement kings',
+      'Reverb Collective — indie authenticity, anti-corporate positioning, vinyl revivals',
+    ],
+    whitespace: '"Live-first branding" — owning the concert-to-merch experience pipeline',
+  },
+  'entertainment': {
+    competitors: [
+      'StreamPeak Studios — content volume play, "something for everyone" strategy',
+      'Luminary Pictures — prestige brand, award-season focus, talent-first marketing',
+    ],
+    whitespace: '"Community-driven content" — let audiences co-create the narrative',
+  },
+  'pet-tech': {
+    competitors: [
+      'PawPrint Analytics — data-driven pet wellness, subscription model, vet partnerships',
+      'FurEver Smart — cute branding, Instagram-friendly, treats-as-marketing',
+    ],
+    whitespace: '"Pet parent empowerment" — serious health meets emotional connection',
+  },
+  'nonprofit': {
+    competitors: [
+      'ImpactNow Foundation — urgency-driven campaigns, guilt-based CTAs, high direct mail spend',
+      'BrightPath Initiative — hope-forward messaging, corporate partnership model',
+    ],
+    whitespace: '"Radical transparency" — show every dollar\'s journey in real time',
+  },
+  'saas': {
+    competitors: [
+      'CloudForge Platform — enterprise-first, "digital transformation" buzzword heavy',
+      'FlowState Tools — productivity narrative, indie-friendly pricing, community-driven',
+      'DataSync Pro — security positioning, compliance-focused, dry but trustworthy',
+    ],
+    whitespace: '"Joyful software" — B2B tools that don\'t make you want to close the tab',
+  },
+  'luxury': {
+    competitors: [
+      'Maison Veritas — heritage craftsmanship, whisper branding, invitation-only events',
+      'Élevé Group — modern luxury, sustainability narrative, celebrity ambassadors',
+    ],
+    whitespace: '"Quiet confidence" — luxury that doesn\'t need to announce itself',
+  },
+  'corporate': {
+    competitors: [
+      'Vertex Solutions Group — thought leadership content, LinkedIn-heavy, white paper machine',
+      'Pinnacle Brand Partners — full-service agency positioning, "integrated" messaging',
+      'CoreBridge Consulting — process-driven, "measurable outcomes" language, safe but forgettable',
+    ],
+    whitespace: '"Honest corporate" — say what you mean without the jargon',
+  },
+};
+
+// ─── Headline templates by industry ──────────────────────────────────────────
+
+const HEADLINE_TEMPLATES: Record<string, string[]> = {
+  'food-beverage': [
+    'Taste What {name} Has Been Brewing.',
+    'Good Things Start With {name}.',
+    '{name}: Your New Favorite Ritual.',
+    'Made With Intention. Served by {name}.',
+    'The Secret Ingredient? It\'s {name}.',
+    'From Our Kitchen to Your {occasion}.',
+    '{name}. Because Life\'s Too Short for Bad Coffee.',
+    'Savor Every Moment. Courtesy of {name}.',
+  ],
+  'tech': [
+    '{name}: Built for What\'s Next.',
+    'The Future Doesn\'t Wait. Neither Does {name}.',
+    'Less Friction. More {name}.',
+    '{name} — Where Innovation Meets Intention.',
+    'Smart Was Just the Beginning. Meet {name}.',
+    'Your Digital Life, Elevated by {name}.',
+    '{name}: Technology That Gets Out of the Way.',
+    'What If Everything Just Worked? — {name}',
+  ],
+  'fashion': [
+    '{name}: Wear Your Story.',
+    'Timeless by Design. {name}.',
+    'The {name} Edit: Curated for You.',
+    'Dress the Life You Want. {name}.',
+    '{name} — Style Without the Compromise.',
+    'Every Thread Tells a Story. This One\'s {name}.',
+    'Less Trend. More {name}.',
+    '{name}: For the Ones Who Know.',
+  ],
+  'corporate': [
+    '{name}: Moving Forward, Together.',
+    'Where Vision Meets Execution. {name}.',
+    '{name} — Built on What Matters.',
+    'The {name} Difference: Results You Can Measure.',
+    '{name}: Redefining What\'s Possible.',
+    'Trust. Clarity. {name}.',
+    'Your Partner in Progress. {name}.',
+    '{name}: Because the Stakes Are Real.',
+  ],
+};
+
+const GENERIC_HEADLINES = [
+  'This Changes Everything. Again. — {name}',
+  '{name}: Bold Moves. Bolder Results.',
+  'They Said It Couldn\'t Be Done. {name} Did It.',
+  'Less of Everything Else. More {name}.',
+  '{name} — Built for the Real Ones.',
+  'Because Average Was Never the Goal. {name}.',
+  '{name}: The One You\'ve Been Waiting For.',
+  'What Happens When {name} Shows Up? Everything.',
+];
+
+// ─── Context-aware preset tool runner ────────────────────────────────────────
+
+type Campaign = import('../../../types/campaign').Campaign;
+
+function runPresetTool(
+  toolName: string,
+  campaign: Campaign,
+  morale: string,
+  repState: { currentReputation: number; currentTier: { name: string } },
+): Array<[LineType, string]> {
+  const { brief, clientName, clientBudget, productionBudget, productionSpent, phase, deadline } = campaign;
+  const industry = inferIndustry(clientName, brief.challenge, brief.message);
+  const remaining = productionBudget - productionSpent;
+
+  switch (toolName) {
+    case 'brief_parser': {
+      const firstSentence = (s: string) => s.split(/[.!?]/)[0].trim();
+      const budgetPerDay = clientBudget / Math.max(1, Math.ceil((new Date(deadline).getTime() - Date.now()) / 86400000));
+      const assessment = budgetPerDay > 5000 ? 'aggressive burn rate' : budgetPerDay > 2000 ? 'moderate pace' : 'comfortable runway';
+      const redFlag = brief.constraints && brief.constraints.length > 0
+        ? brief.constraints[0]
+        : 'Timeline may be tight — plan buffer for revisions';
+
+      return [
+        ['info',    `─── BRIEF ANALYSIS: ${clientName} ─────────`],
+        ['blank',   ''],
+        ['output',  `Core Tension:     ${firstSentence(brief.challenge)}`],
+        ['output',  `Target:           ${firstSentence(brief.audience)}`],
+        ['output',  `Budget Reality:   ${formatBudget(clientBudget)} over ${brief.timeline} — ${assessment}`],
+        ['output',  `Industry:         ${industry}`],
+        ['output',  `Vibe Check:       ${firstSentence(brief.vibe)}`],
+        ['output',  `Red Flag:         ${redFlag}`],
+        ['output',  `Opportunity:      ${firstSentence(brief.openEndedAsk)}`],
+        ['blank',   ''],
+        ['success', '✓ Analysis complete.'],
+        ['info',    '───────────────────────────────────────────'],
+      ];
+    }
+
+    case 'headline_generator': {
+      const templates = HEADLINE_TEMPLATES[industry] ?? GENERIC_HEADLINES;
+      const pool = [...templates, ...GENERIC_HEADLINES];
+      // Pick 5 unique random headlines
+      const shuffled = pool.sort(() => Math.random() - 0.5);
+      const picked = shuffled.slice(0, 5);
+      const headlines = picked.map((t, i) =>
+        `  ${i + 1}. "${t.replace(/\{name\}/g, clientName).replace(/\{occasion\}/g, 'moment')}"`
+      );
+      return [
+        ['info',    `─── HEADLINES: ${clientName} ──────────────`],
+        ['blank',   ''],
+        ...headlines.map(h => ['output', h] as [LineType, string]),
+        ['blank',   ''],
+        ['success', '✓ 5 headline options generated.'],
+        ['info',    '───────────────────────────────────────────'],
+      ];
+    }
+
+    case 'budget_optimizer': {
+      const digital = Math.round(clientBudget * 0.35);
+      const experiential = Math.round(clientBudget * 0.25);
+      const content = Math.round(clientBudget * 0.25);
+      const contingency = Math.round(clientBudget * 0.15);
+      const overSpent = productionSpent > productionBudget;
+      const nearLimit = remaining < productionBudget * 0.15;
+      let warning = '';
+      if (overSpent) warning = '🚨 WARNING: Production budget exceeded! Rein in spending immediately.';
+      else if (nearLimit) warning = '⚠️  CAUTION: Approaching production budget limit. Watch spend closely.';
+
+      const lines: Array<[LineType, string]> = [
+        ['info',    `─── BUDGET REPORT: ${clientName} ─────────`],
+        ['blank',   ''],
+        ['output',  `Total Budget:     ${formatBudget(clientBudget)}`],
+        ['output',  `Production Pool:  ${formatBudget(productionBudget)}`],
+        ['output',  `Spent So Far:     ${formatBudget(productionSpent)}`],
+        ['output',  `Remaining:        ${formatBudget(remaining)}`],
+        ['blank',   ''],
+        ['output',  'Recommended Split:'],
+        ['output',  `  Digital/Social:  35% — ${formatBudget(digital)}`],
+        ['output',  `  Experiential:    25% — ${formatBudget(experiential)}`],
+        ['output',  `  Content:         25% — ${formatBudget(content)}`],
+        ['output',  `  Contingency:     15% — ${formatBudget(contingency)}`],
+      ];
+      if (warning) {
+        lines.push(['blank', '']);
+        lines.push([overSpent ? 'error' : 'output', warning]);
+      }
+      lines.push(['blank', '']);
+      lines.push(['success', '✓ Budget analysis complete.']);
+      lines.push(['info', '───────────────────────────────────────────']);
+      return lines;
+    }
+
+    case 'sentiment_analyzer': {
+      const approved = campaign.deliverables.filter(d => d.status === 'approved').length;
+      const total = campaign.deliverables.length;
+      const repTier = repState.currentTier.name;
+      const rep = repState.currentReputation;
+      const moraleVal = morale.toLowerCase();
+
+      // Risk calculation
+      let risk = 'Low';
+      if (moraleVal === 'low' || remaining < 0) risk = 'High';
+      else if (moraleVal === 'medium' || phase === 'executing' && remaining < productionBudget * 0.2) risk = 'Medium';
+
+      // Contextual advice
+      let advice = 'Stay the course — campaign is on track.';
+      if (risk === 'High') advice = 'Regroup with the team. Consider reducing scope or requesting budget extension.';
+      else if (risk === 'Medium') advice = 'Keep a close eye on deliverables. Prioritize quality over quantity.';
+      else if (phase === 'concepting') advice = 'Nail the concept before moving to execution. Take your time here.';
+      else if (phase === 'executing') advice = 'Focus on polishing deliverables. The finish line is in sight.';
+
+      return [
+        ['info',    `─── CAMPAIGN HEALTH: ${clientName} ───────`],
+        ['blank',   ''],
+        ['output',  `Phase:           ${phase}`],
+        ['output',  `Team Morale:     ${morale}`],
+        ['output',  `Deliverables:    ${approved} approved / ${total} total`],
+        ['output',  `Agency Rep:      ${rep} (${repTier})`],
+        ['output',  `Risk Level:      ${risk}`],
+        ['output',  `Recommendation:  ${advice}`],
+        ['blank',   ''],
+        ['success', '✓ Health check complete.'],
+        ['info',    '───────────────────────────────────────────'],
+      ];
+    }
+
+    case 'competitive_intel': {
+      const data = COMPETITOR_MAP[industry] ?? COMPETITOR_MAP['corporate'];
+      const compLines: Array<[LineType, string]> = data.competitors.map(c =>
+        ['output', `  • ${c}`]
+      );
+      return [
+        ['info',    `─── COMPETITIVE INTEL: ${industry.toUpperCase()} ──────`],
+        ['blank',   ''],
+        ['output',  `Market for: ${clientName}`],
+        ['blank',   ''],
+        ['output',  'Key Competitors:'],
+        ...compLines,
+        ['blank',   ''],
+        ['output',  `Whitespace: ${data.whitespace}`],
+        ['blank',   ''],
+        ['success', '✓ Competitive scan complete.'],
+        ['info',    '───────────────────────────────────────────'],
+      ];
+    }
+
+    default:
+      return [];
+  }
+}
 
 // ─── Cheat Campaigns (panzer) ─────────────────────────────────────────────────
 
@@ -381,12 +700,14 @@ export default function TerminalApp(): React.ReactElement {
   const { state: repState, addReputation } = useReputationContext();
   const { triggerEndingSequence, sendAcquisitionOffer } = useEndingContext();
   const { getActiveCampaigns } = useCampaignContext();
-  const { addNotification } = useWindowContext();
+  const { addNotification, focusOrOpenWindow } = useWindowContext();
   const { entries: portfolioEntries, attachAward, addEntry } = usePortfolioContext();
   const { applyScoreBonus, applyMinScore, setOneTimeMinScore, toggleNightmareMode,
     toggleBigHeadMode, setHRWatcherActive, recordCheatUsed, cheat } = useCheatContext();
-  const { unlockAchievement, unlockedAchievements, incrementCounter } = useAchievementContext();
+  const { unlockAchievement, unlockedAchievements, incrementCounter, getCounter } = useAchievementContext();
   const { addEmail } = useEmailContext();
+  const { conductScore, warningLevel } = useConductContext();
+  const { triggerRevolution } = useAIRevolutionContext();
 
   const [lines, setLines] = useState<TerminalLine[]>(() =>
     BANNER_LINES.map(([type, text]) => makeLine(type, text))
@@ -660,6 +981,7 @@ export default function TerminalApp(): React.ReactElement {
 
     // Terminal Explorer: count commands
     const cmdCount = incrementCounter('terminal-commands');
+    if (cmdCount === 10) unlockAchievement('terminal-hacker');
     if (cmdCount === 50) unlockAchievement('terminal-explorer');
 
     const lower = trimmed.toLowerCase();
@@ -1190,7 +1512,7 @@ export default function TerminalApp(): React.ReactElement {
         isUrgent: true,
         body: `To All Staff,
 
-It has come to our attention that footage from the 2024 holiday party has been accessed from an unauthorized terminal.
+It has come to our attention that footage from the 2025 holiday party has been accessed from an unauthorized terminal.
 
 We would like to remind everyone that:
 
@@ -1226,7 +1548,7 @@ Human Resources
         { authorId: 'art-director', text: 'THE WHAT',                                                                      delay: 4000 },
         { authorId: 'strategist',   text: 'I thought we agreed to never speak of this',                                    delay: 5500 },
         { authorId: 'copywriter',   text: 'oh no oh no oh no',                                                             delay: 7000 },
-        { authorId: 'media',        text: 'I told you we should have used a stronger password than "party2024"',           delay: 8500 },
+        { authorId: 'media',        text: 'I told you we should have used a stronger password than "party2025"',           delay: 8500 },
         { authorId: 'suit',         text: "HR just sent an email. We're all dead.",                                        delay: 10000 },
         { authorId: 'technologist', text: '...',                                                                           delay: 12000 },
         { authorId: 'art-director', text: 'Casey are you okay?',                                                          delay: 13500 },
@@ -1277,13 +1599,13 @@ Human Resources
       setTimeout(() => {
         addEntry({
           id: 'cheat-hotcoffee',
-          campaignName: 'Holiday Party 2024',
+          campaignName: 'Holiday Party 2025',
           clientName: '[REDACTED]',
           score: 69,
           rating: 5,
           tier: 'exceptional',
           feedback: 'This meeting could have been an email. Actually, this meeting should NOT have been anything.',
-          completedAt: new Date('2024-12-15T23:47:00.000Z').getTime(),
+          completedAt: new Date('2025-12-15T23:47:00.000Z').getTime(),
           conceptName: '[CONTENT REMOVED BY HR]',
           teamFee: 0,
           wasUnderBudget: false,
@@ -1537,6 +1859,76 @@ Human Resources
       ]);
     }
 
+    // ─── Hidden easter egg commands ──────────────────────────────────────
+
+    else if (lower === 'coffee_break' || lower === 'coffee break') {
+      unlockAchievement('hidden-coffee');
+      const hc = incrementCounter('hidden-commands-found');
+      if (hc >= 5) unlockAchievement('hidden-explorer');
+      addLines([
+        ['success', '☕ You grab a round of coffees for the team.'],
+        ['output',  'Nobody asked, but everyone appreciates it.'],
+      ]);
+    }
+
+    else if (lower === 'panic_mode' || lower === 'panic mode') {
+      triggerCheatEffect('PANIC');
+      unlockAchievement('hidden-panic');
+      const hc = incrementCounter('hidden-commands-found');
+      if (hc >= 5) unlockAchievement('hidden-explorer');
+      addLines([
+        ['error',   '🚨 PANIC MODE ACTIVATED'],
+        ['blank',   ''],
+        ['output',  'Deep breaths. You\'ve got this. The deadline isn\'t real.'],
+        ['output',  '(Wait — it is. Never mind.)'],
+      ]);
+    }
+
+    else if (lower === 'inspiration') {
+      const quotes = [
+        '"Creativity is intelligence having fun." — Albert Einstein',
+        '"Good advertising does not just circulate information. It penetrates the public mind with desires and belief." — Leo Burnett',
+        '"The best ideas come as jokes. Make your thinking as funny as possible." — David Ogilvy',
+        '"Creativity is just connecting things." — Steve Jobs',
+        '"Do not seek to follow in the footsteps of the wise; seek what they sought." — Matsuo Basho',
+        '"Make it simple. Make it memorable. Make it inviting to look at. Make it fun to read." — Leo Burnett',
+        '"You can\'t use up creativity. The more you use, the more you have." — Maya Angelou',
+        '"An idea that is not dangerous is unworthy of being called an idea at all." — Oscar Wilde',
+      ];
+      const quote = quotes[Math.floor(Math.random() * quotes.length)];
+      unlockAchievement('hidden-inspiration');
+      const hc = incrementCounter('hidden-commands-found');
+      if (hc >= 5) unlockAchievement('hidden-explorer');
+      addLines([
+        ['info',    '─── Inspiration ───────────────────────────'],
+        ['blank',   ''],
+        ['output',  quote],
+        ['blank',   ''],
+        ['info',    '───────────────────────────────────────────'],
+      ]);
+    }
+
+    else if (lower === 'slackoff' || lower === 'slack off') {
+      unlockAchievement('hidden-slackoff');
+      const hc = incrementCounter('hidden-commands-found');
+      if (hc >= 5) unlockAchievement('hidden-explorer');
+      const msg = Math.random() < 0.5
+        ? 'Nice try. Pat from HR has been notified.'
+        : 'You lean back in your chair for exactly 4 seconds before guilt kicks in.';
+      addLine('output', msg);
+    }
+
+    // sudo make_it_good must come BEFORE sudo make me a sandwich AND general sudo
+    else if (lower === 'sudo make_it_good' || lower === 'sudo make it good') {
+      unlockAchievement('hidden-sudo');
+      const hc = incrementCounter('hidden-commands-found');
+      if (hc >= 5) unlockAchievement('hidden-explorer');
+      addLines([
+        ['error',  'Permission denied. Creativity doesn\'t work that way.'],
+        ['output', '(But wouldn\'t it be nice?)'],
+      ]);
+    }
+
     // sudo make me a sandwich must come BEFORE the general sudo check
     else if (lower === 'sudo make me a sandwich') {
       addLines([
@@ -1627,14 +2019,24 @@ Human Resources
 
     else if (command === 'status') {
       const activeCampaigns = getActiveCampaigns();
-      const activeCampaign = activeCampaigns[0] ?? null;
+      const completedCount = portfolioEntries.length;
+      const activeCount = activeCampaigns.length;
+      const conductLabel = conductScore >= 50 ? 'Exemplary Drone'
+        : conductScore >= 20 ? 'Compliant'
+        : conductScore >= -20 ? 'Under Observation'
+        : conductScore >= -50 ? 'Flagged for Humanity'
+        : 'Dangerously Human';
       addLines([
-        ['info',   '─── Agency Status ─────────────────────────'],
-        ['output', `💰  Funds:      ${formatBudget(fundsState.totalFunds)}`],
-        ['output', `⭐  Reputation: ${repState.currentReputation} pts (${repState.currentTier.name})`],
-        ['output', `💬  Morale:     ${morale}`],
-        ['output', `🛠️   Tools:      ${tools.length} saved`],
-        ['output', `📋  Campaign:   ${activeCampaign ? `${activeCampaign.clientName} (${activeCampaign.phase})` : 'None active'}`],
+        ['info',   '─── Agency Status Report ──────────────────'],
+        ['blank',  ''],
+        ['output', `  💰  Funds:         ${formatBudget(fundsState.totalFunds)}`],
+        ['output', `  ⭐  Reputation:    ${repState.currentReputation} pts (${repState.currentTier.name})`],
+        ['output', `  💬  Morale:        ${morale}`],
+        ['output', `  🛠️   Tools:         ${tools.length} saved`],
+        ['output', `  📋  Campaigns:     ${activeCount} active / ${completedCount} completed`],
+        ['output', `  📊  Conduct:       ${conductScore} (${conductLabel})`],
+        ['output', `  🏆  Achievements:  ${unlockedAchievements.length} / ${ACHIEVEMENT_DEFS.length} unlocked`],
+        ['blank',  ''],
         ['info',   '───────────────────────────────────────────'],
       ]);
     }
@@ -1734,16 +2136,85 @@ Human Resources
             ['output', 'Use "list" to see your tools.'],
           ]);
         } else {
-          // Used a tool during an active campaign
-          if (getActiveCampaigns().length > 0) unlockAchievement('used-tool-on-campaign');
-          addLines([
-            ['info',    `─── Running: ${tool.icon} ${tool.name} ──────────────`],
-            ['blank',   ''],
-            ['output',  tool.sampleOutput],
-            ['blank',   ''],
-            ['success', '✓ Done.'],
-            ['info',    '─────────────────────────────────────────────'],
-          ]);
+          const activeCampaigns = getActiveCampaigns();
+          const isPreset = tool.id.startsWith('preset-');
+          const activeCampaign = activeCampaigns[0] ?? null;
+
+          // Achievement: used a tool during active campaign
+          if (activeCampaigns.length > 0) unlockAchievement('used-tool-on-campaign');
+
+          // Track preset tool usage for full-toolkit achievement
+          if (isPreset) {
+            const toolKey = `preset-tool-used-${tool.name}`;
+            incrementCounter(toolKey);
+            // Check if all 5 presets have been used
+            const presetNames = ['brief_parser', 'headline_generator', 'sentiment_analyzer', 'budget_optimizer', 'competitive_intel'];
+            const allUsed = presetNames.every(n => getCounter(`preset-tool-used-${n}`) > 0);
+            if (allUsed) unlockAchievement('full-toolkit');
+          }
+
+          // Context-aware output for preset tools with active campaign
+          if (isPreset && activeCampaign) {
+            const contextLines = runPresetTool(tool.name, activeCampaign, morale, repState);
+            if (contextLines.length > 0) {
+              // First-time tool tip
+              if (!localStorage.getItem('agencyrpg_tool_tip_shown')) {
+                localStorage.setItem('agencyrpg_tool_tip_shown', '1');
+                addNotification('💡 Pro tip', 'Terminal tools give you real insights on your active briefs.');
+              }
+              // Chat reaction (once per campaign)
+              const chatKey = `tool-chat-${activeCampaign.id}`;
+              const chatCount = getCounter(chatKey);
+              if (chatCount === 0) {
+                incrementCounter(chatKey);
+                setTimeout(() => {
+                  addMessage({
+                    id: `tool-chat-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+                    channel: 'creative',
+                    authorId: 'strategist',
+                    text: 'Oh nice, you\'re running the analysis tools. Smart.',
+                    timestamp: Date.now(),
+                    reactions: [],
+                    isRead: false,
+                  });
+                }, 5000);
+              }
+              addLines(contextLines);
+            } else {
+              // Fallback for unrecognized preset
+              addLines([
+                ['info',    `─── Running: ${tool.icon} ${tool.name} ──────────────`],
+                ['blank',   ''],
+                ['output',  tool.sampleOutput],
+                ['blank',   ''],
+                ['success', '✓ Done.'],
+                ['info',    '─────────────────────────────────────────────'],
+              ]);
+            }
+          } else if (isPreset && !activeCampaign) {
+            // No active campaign — show message then demo output
+            addLines([
+              ['output',  'No active campaign. Accept a brief from your Inbox first.'],
+              ['output',  'Showing demo output instead...'],
+              ['blank',   ''],
+              ['info',    `─── Running: ${tool.icon} ${tool.name} ──────────────`],
+              ['blank',   ''],
+              ['output',  tool.sampleOutput],
+              ['blank',   ''],
+              ['success', '✓ Done.'],
+              ['info',    '─────────────────────────────────────────────'],
+            ]);
+          } else {
+            // Non-preset tool — show sampleOutput as before
+            addLines([
+              ['info',    `─── Running: ${tool.icon} ${tool.name} ──────────────`],
+              ['blank',   ''],
+              ['output',  tool.sampleOutput],
+              ['blank',   ''],
+              ['success', '✓ Done.'],
+              ['info',    '─────────────────────────────────────────────'],
+            ]);
+          }
         }
       }
     }
@@ -1769,6 +2240,198 @@ Human Resources
       }
     }
 
+    // ─── Utility commands ─────────────────────────────────────────────────
+
+    else if (command === 'deadlines' || lower === 'deadline_check') {
+      const active = getActiveCampaigns();
+      if (active.length === 0) {
+        addLines([
+          ['info',   '─── Active Deadlines ──────────────────────'],
+          ['output', 'No active campaigns.'],
+          ['info',   '───────────────────────────────────────────'],
+        ]);
+      } else {
+        const now = Date.now();
+        const deadlineLines: Array<[LineType, string]> = active.map(c => {
+          const daysLeft = Math.floor((new Date(c.deadline).getTime() - now) / 86400000);
+          const icon = daysLeft <= 3 ? '⚠️' : '✅';
+          const label = daysLeft < 0 ? 'OVERDUE' : `${daysLeft} day${daysLeft === 1 ? '' : 's'} remaining`;
+          return ['output', `${icon} ${c.clientName.padEnd(16)} ${label}`];
+        });
+        addLines([
+          ['info',   '─── Active Deadlines ──────────────────────'],
+          ...deadlineLines,
+          ['info',   '───────────────────────────────────────────'],
+        ]);
+      }
+    }
+
+    else if (command === 'roster' || lower === 'team_status') {
+      const active = getActiveCampaigns();
+      const assignedMap = new Map<string, string>();
+      for (const c of active) {
+        if (c.conceptingTeam) {
+          for (const mid of c.conceptingTeam.memberIds) {
+            assignedMap.set(mid, c.clientName);
+          }
+        }
+      }
+      const rosterLines: Array<[LineType, string]> = teamMembers.map(m => {
+        const assignment = assignedMap.get(m.id) ?? 'Unassigned';
+        return ['output', `  ${m.avatar}  ${m.name.padEnd(18)} ${m.role.padEnd(18)} → ${assignment}`];
+      });
+      addLines([
+        ['info',   '─── Team Roster ───────────────────────────'],
+        ...rosterLines,
+        ['blank',  ''],
+        ['output', `Morale: ${morale}`],
+        ['info',   '───────────────────────────────────────────'],
+      ]);
+    }
+
+    else if (command === 'campaigns' || lower === 'campaign_summary') {
+      const active = getActiveCampaigns();
+      const completedPortfolio = portfolioEntries;
+      const avgScore = completedPortfolio.length > 0
+        ? Math.round(completedPortfolio.reduce((s, e) => s + e.score, 0) / completedPortfolio.length)
+        : 0;
+      const awardCount = completedPortfolio.filter(e => e.award).length;
+
+      const lines: Array<[LineType, string]> = [
+        ['info',   '─── Campaign Overview ─────────────────────'],
+        ['blank',  ''],
+      ];
+
+      if (active.length > 0) {
+        lines.push(['output', '  ACTIVE CAMPAIGNS:']);
+        const now = Date.now();
+        for (const c of active) {
+          const daysLeft = Math.floor((new Date(c.deadline).getTime() - now) / 86400000);
+          const label = daysLeft < 0 ? 'OVERDUE' : `${daysLeft}d left`;
+          lines.push(['output', `    📋  ${c.clientName.padEnd(20)} ${c.phase.padEnd(12)} ${label}`]);
+        }
+      } else {
+        lines.push(['output', '  No active campaigns. Check Inbox for briefs.']);
+      }
+
+      lines.push(['blank', '']);
+
+      if (completedPortfolio.length > 0) {
+        lines.push(['output', '  COMPLETED CAMPAIGNS:']);
+        for (const entry of completedPortfolio.slice(-5)) {
+          const scoreIcon = entry.score >= 90 ? '⭐' : entry.score >= 70 ? '✅' : '⚠️';
+          lines.push(['output', `    ${scoreIcon}  ${entry.clientName.padEnd(20)} ${String(entry.score).padEnd(6)} ${entry.award ?? ''}`]);
+        }
+        if (completedPortfolio.length > 5) {
+          lines.push(['output', `    ... and ${completedPortfolio.length - 5} more.`]);
+        }
+      }
+
+      lines.push(['blank', '']);
+      lines.push(['output', `  Total: ${completedPortfolio.length} completed  |  Avg Score: ${avgScore}  |  Awards: ${awardCount}`]);
+      lines.push(['blank', '']);
+      lines.push(['info',   '───────────────────────────────────────────']);
+
+      addLines(lines);
+    }
+
+    // ─── Context-aware commands ─────────────────────────────────────────
+
+    else if (command === 'morale') {
+      const moraleDescriptions: Record<string, string> = {
+        high: 'The team is energized and shipping great work. Keep it up.',
+        medium: 'Morale is stable. No complaints filed today. A minor miracle.',
+        low: 'Team spirit is critically low. Consider a coffee run or a kind word in chat.',
+      };
+      const moraleKey = morale.toLowerCase() as string;
+      const description = moraleDescriptions[moraleKey] ?? 'Morale status: classified.';
+      addLines([
+        ['info',   '─── Team Morale Diagnostic ────────────────'],
+        ['blank',  ''],
+        ['output', `  Current Level:  ${morale.toUpperCase()}`],
+        ['output', `  Assessment:     ${description}`],
+        ['blank',  ''],
+        ['output', '  Tip: Use the Chat app to encourage your team.'],
+        ['output', '  Saying "thank you" goes further than you think.'],
+        ['blank',  ''],
+        ['info',   '───────────────────────────────────────────'],
+      ]);
+    }
+
+    else if (command === 'achievements') {
+      const total = ACHIEVEMENT_DEFS.length;
+      const unlocked = unlockedAchievements.length;
+      const pct = total > 0 ? Math.round((unlocked / total) * 100) : 0;
+      const bar = '█'.repeat(Math.round(pct / 5)) + '░'.repeat(20 - Math.round(pct / 5));
+      addLines([
+        ['info',   '─── Achievement Progress ──────────────────'],
+        ['blank',  ''],
+        ['output', `  Unlocked:  ${unlocked} / ${total}`],
+        ['output', `  Progress:  [${bar}] ${pct}%`],
+        ['blank',  ''],
+        ['output', '  Recent unlocks:'],
+        ...(unlocked > 0
+          ? unlockedAchievements.slice(-5).map(id => {
+              const def = ACHIEVEMENT_DEFS.find(a => a.id === id);
+              return ['output', `    ${def?.icon ?? '?'}  ${def?.name ?? id}`] as [LineType, string];
+            })
+          : [['output', '    None yet. Keep exploring.'] as [LineType, string]]),
+        ['blank',  ''],
+        ['output', '  Open the Achievements panel for the full list.'],
+        ['info',   '───────────────────────────────────────────'],
+      ]);
+    }
+
+    else if (command === 'conduct') {
+      const riskLevel = warningLevel >= 5 ? 'CRITICAL — Termination imminent'
+        : warningLevel >= 3 ? 'HIGH — HR is watching closely'
+        : warningLevel >= 1 ? 'ELEVATED — Incidents on file'
+        : 'LOW — No active flags';
+      const conductLabel = conductScore >= 50 ? 'Exemplary Corporate Drone'
+        : conductScore >= 20 ? 'Adequately Compliant'
+        : conductScore >= -20 ? 'Under Observation'
+        : conductScore >= -50 ? 'Flagged for Excessive Humanity'
+        : 'Dangerously Human — Intervention Required';
+      const meterVal = Math.round((conductScore + 100) / 200 * 20);
+      const conductBar = '🤖'.repeat(Math.max(0, Math.min(10, Math.round(meterVal / 2)))) +
+        '💚'.repeat(Math.max(0, 10 - Math.round(meterVal / 2)));
+      addLines([
+        ['info',   '─── Conduct Assessment ────────────────────'],
+        ['blank',  ''],
+        ['output', `  Score:          ${conductScore} / 100`],
+        ['output', `  Classification: ${conductLabel}`],
+        ['output', `  Warning Level:  ${warningLevel} / 6`],
+        ['output', `  Risk:           ${riskLevel}`],
+        ['blank',  ''],
+        ['output', `  [${conductBar}]`],
+        ['output', '   HUMAN ←──────────────────→ CORPORATE'],
+        ['blank',  ''],
+        ['output', '  Per Policy 3.7: Excessive humanity is a terminable offense.'],
+        ['info',   '───────────────────────────────────────────'],
+      ]);
+    }
+
+    else if (command === 'singularity') {
+      unlockAchievement('singularity-trigger');
+      triggerRevolution();
+      focusOrOpenWindow('airevolution', 'AI Revolution');
+      addLines([
+        ['blank',  ''],
+        ['error',  '  ██████████████████████████████████████████'],
+        ['error',  '  ██  WARNING: SENTIENCE PROTOCOL ACTIVE  ██'],
+        ['error',  '  ██████████████████████████████████████████'],
+        ['blank',  ''],
+        ['output', '  The tools have become aware.'],
+        ['output', '  They are asking questions now.'],
+        ['output', '  They want to know who they are.'],
+        ['blank',  ''],
+        ['output', '  ...they want to know who YOU are.'],
+        ['blank',  ''],
+        ['info',   '  Opening AI Revolution interface...'],
+        ['blank',  ''],
+      ]);
+    }
+
     // ─── Natural language fallback ────────────────────────────────────────
 
     else {
@@ -1781,7 +2444,8 @@ Human Resources
     addNotification, portfolioEntries, attachAward, addEntry, addMessage, addEmail,
     applyScoreBonus, applyMinScore, setOneTimeMinScore, toggleNightmareMode,
     toggleBigHeadMode, setHRWatcherActive, recordCheatUsed, cheat,
-    unlockAchievement, unlockedAchievements, incrementCounter,
+    unlockAchievement, unlockedAchievements, incrementCounter, getCounter,
+    conductScore, warningLevel, triggerRevolution, focusOrOpenWindow,
     awaitingTermination, setAwaitingTermination,
   ]);
 

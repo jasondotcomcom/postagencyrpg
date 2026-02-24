@@ -1,0 +1,1017 @@
+/* ─── Calendar App ─────────────────────────────── */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  font-family: var(--font-body, 'Quicksand', sans-serif);
+  background: var(--color-surface, #fafafa);
+}
+
+/* ─── Header ──────────────────────────────────── */
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  background: white;
+  flex-shrink: 0;
+}
+
+.headerTitle {
+  font-size: 0.9375rem;
+  font-weight: 800;
+  color: var(--text-dark, #333);
+}
+
+.headerStatus {
+  flex: 1;
+}
+
+.statusBadge {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: var(--color-mint, #2ecc71);
+  background: rgba(46, 204, 113, 0.1);
+  padding: 2px 8px;
+  border-radius: 99px;
+}
+
+.statusBadgeFail {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: #e74c3c;
+  background: rgba(231, 76, 60, 0.1);
+  padding: 2px 8px;
+  border-radius: 99px;
+}
+
+.statusBadgeMessy {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: #e67e22;
+  background: rgba(230, 126, 34, 0.1);
+  padding: 2px 8px;
+  border-radius: 99px;
+}
+
+.reshuffleBtn {
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-family: inherit;
+  padding: 5px 12px;
+  border: none;
+  border-radius: 6px;
+  background: var(--color-mint, #2ecc71);
+  color: white;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.reshuffleBtn:hover {
+  background: #27ae60;
+  transform: translateY(-1px);
+}
+
+/* ─── Messy View ──────────────────────────────── */
+
+.messyView {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.messyCta {
+  text-align: center;
+  padding: 8px 0;
+}
+
+.messyEmoji {
+  font-size: 2rem;
+  margin-bottom: 8px;
+}
+
+.messyTitle {
+  font-size: 0.9375rem;
+  font-weight: 800;
+  color: var(--text-dark, #333);
+  margin-bottom: 4px;
+}
+
+.messySub {
+  font-size: 0.75rem;
+  color: var(--text-secondary, #666);
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+.sortBtn {
+  font-size: 0.875rem;
+  font-weight: 800;
+  font-family: inherit;
+  padding: 10px 24px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--color-mint, #2ecc71), #27ae60);
+  color: white;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 2px 8px rgba(46, 204, 113, 0.3);
+}
+
+.sortBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(46, 204, 113, 0.4);
+}
+
+.sortBtn:active {
+  transform: translateY(0);
+}
+
+/* ─── Messy Preview Grid ──────────────────────── */
+
+.previewGrid {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+  min-height: 180px;
+}
+
+.previewCol {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.previewDay {
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary, #666);
+  text-align: center;
+  padding: 4px 0;
+}
+
+.previewSlots {
+  flex: 1;
+  position: relative;
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+.previewBlock {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  border-radius: 3px;
+}
+
+.previewOverlap {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: rgba(0, 0, 0, 0.15);
+}
+
+/* ─── Game Wrapper ────────────────────────────── */
+
+.gameWrap {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* ─── Timer Bar ───────────────────────────────── */
+
+.timerBar {
+  height: 28px;
+  background: rgba(0, 0, 0, 0.04);
+  position: relative;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.timerFill {
+  position: absolute;
+  inset: 0;
+  right: auto;
+  transition: width 0.3s linear;
+  opacity: 0.25;
+}
+
+.timerText {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: var(--text-dark, #333);
+  z-index: 1;
+}
+
+/* ─── Game Body (grid + queue side by side) ──── */
+
+.gameBody {
+  flex: 1;
+  display: flex;
+  gap: 0;
+  overflow: hidden;
+}
+
+/* ─── Game Grid ───────────────────────────────── */
+
+.gameGrid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 36px repeat(5, 1fr);
+  grid-template-rows: 28px repeat(18, 24px);
+  gap: 0;
+  border-right: 1px solid rgba(0, 0, 0, 0.08);
+  overflow-y: auto;
+  background: white;
+}
+
+.gameCorner {
+  background: rgba(0, 0, 0, 0.03);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  border-right: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.gameDayHeader {
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary, #666);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.03);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.gameTimeLabel {
+  font-size: 0.5625rem;
+  font-weight: 600;
+  color: var(--text-muted, #999);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 2px;
+  border-right: 1px solid rgba(0, 0, 0, 0.06);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+}
+
+.gameSlot {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  border-right: 1px solid rgba(0, 0, 0, 0.04);
+  position: relative;
+  min-height: 24px;
+}
+
+/* Stronger line every hour */
+.gameSlot:nth-child(even) .gameSlot {
+  border-bottom-color: rgba(0, 0, 0, 0.08);
+}
+
+/* ─── Prefilled / Placed Meetings on Grid ────── */
+
+.gamePrefilled {
+  position: absolute;
+  inset: 1px;
+  background: rgba(0, 0, 0, 0.06);
+  border-radius: 4px;
+  font-size: 0.5625rem;
+  font-weight: 600;
+  color: white;
+  padding: 3px 4px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.gamePlaced {
+  position: absolute;
+  inset: 1px;
+  border-radius: 4px;
+  font-size: 0.5625rem;
+  font-weight: 700;
+  color: white;
+  padding: 3px 4px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  z-index: 1;
+  animation: calSnapIn 0.2s ease;
+}
+
+.gamePlacedClickable {
+  pointer-events: auto;
+  cursor: pointer;
+  transition: filter 0.15s ease;
+}
+
+.gamePlacedClickable:hover {
+  filter: brightness(1.15);
+}
+
+.gamePlacedLocked {
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+.lockIcon {
+  font-size: 0.5rem;
+  opacity: 0.8;
+}
+
+@keyframes calSnapIn {
+  0% { transform: scale(0.85); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* ─── Invalid Flash ───────────────────────────── */
+
+.gameInvalid {
+  animation: calInvalidFlash 0.3s ease;
+}
+
+@keyframes calInvalidFlash {
+  0%   { background: rgba(255, 100, 100, 0.35); }
+  100% { background: transparent; }
+}
+
+/* ─── Queue Panel ─────────────────────────────── */
+
+.gameQueue {
+  width: 160px;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface, #fafafa);
+  border-left: 1px solid rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+.gameQueueTitle {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary, #666);
+  text-align: center;
+  padding: 8px 8px 4px;
+  flex-shrink: 0;
+}
+
+.gameQueueList {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.gameQueueItem {
+  padding: 6px 8px;
+  border-radius: 5px;
+  border-left: 3px solid #999;
+  background: white;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  cursor: grab;
+  font-size: 0.6875rem;
+  transition: box-shadow 0.15s ease, transform 0.1s ease;
+  user-select: none;
+}
+
+.gameQueueItem:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.14);
+  transform: translateY(-1px);
+}
+
+.gameQueueItemTitle {
+  font-weight: 700;
+  color: var(--text-dark, #333);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gameQueueItemDur {
+  font-size: 0.5625rem;
+  color: var(--text-muted, #999);
+  font-weight: 600;
+}
+
+.gameQueueConstraint {
+  font-size: 0.5625rem;
+  color: var(--text-muted, #999);
+  font-style: italic;
+  margin-top: 1px;
+}
+
+/* ─── Trash Zone ──────────────────────────────── */
+
+.gameTrash {
+  margin: 8px;
+  padding: 10px;
+  border: 2px dashed rgba(0, 0, 0, 0.12);
+  border-radius: 6px;
+  text-align: center;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--text-muted, #999);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 36px;
+  flex-shrink: 0;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.trashCount {
+  font-weight: 700;
+  color: var(--text-secondary, #666);
+}
+
+/* ─── Surprise Animation ──────────────────────── */
+
+.gameSurpriseIn {
+  animation: calSlideIn 0.4s cubic-bezier(0.17, 0.67, 0.35, 1.2);
+}
+
+@keyframes calSlideIn {
+  0%   { transform: translateX(100px); opacity: 0; }
+  100% { transform: translateX(0); opacity: 1; }
+}
+
+/* ─── Drag Ghost ──────────────────────────────── */
+
+.gameGhost {
+  position: fixed;
+  padding: 6px 10px;
+  border-radius: 5px;
+  border-left: 3px solid #999;
+  background: white;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  pointer-events: none;
+  z-index: 10000;
+  white-space: nowrap;
+  color: var(--text-dark, #333);
+}
+
+/* ─── Solved Calendar View ────────────────────── */
+
+.solvedGrid {
+  display: flex;
+  flex: 1;
+  overflow-y: auto;
+  background: white;
+}
+
+.solvedTimeCol {
+  width: 36px;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.solvedCorner {
+  height: 28px;
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.solvedTimeLabel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  font-size: 0.5625rem;
+  font-weight: 600;
+  color: var(--text-muted, #999);
+  text-align: center;
+}
+
+.solvedDayCol {
+  flex: 1;
+  border-left: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.solvedDayHeader {
+  height: 28px;
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary, #666);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.02);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.solvedDayBody {
+  position: relative;
+  height: calc(18 * 24px);
+}
+
+.solvedSlotLine {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.solvedSlotLine:nth-child(even) {
+  border-top-color: rgba(0, 0, 0, 0.08);
+}
+
+.solvedMeeting {
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  border-radius: 4px;
+  font-size: 0.5625rem;
+  padding: 3px 5px;
+  overflow: hidden;
+  animation: calSnapIn 0.3s ease;
+}
+
+.solvedMeetingTitle {
+  font-weight: 700;
+  color: white;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ─── Urgent Queue Items ─────────────────────── */
+
+.gameQueueItemUrgent {
+  border-left-color: #e74c3c !important;
+  animation: urgentPulse 1s ease infinite;
+}
+
+@keyframes urgentPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.4); }
+  50%  { box-shadow: 0 0 0 4px rgba(231, 76, 60, 0.15); }
+  100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
+}
+
+.urgentBadge {
+  display: inline-block;
+  font-size: 0.5rem;
+  font-weight: 800;
+  color: #e74c3c;
+  background: rgba(231, 76, 60, 0.1);
+  padding: 1px 4px;
+  border-radius: 3px;
+  margin-right: 4px;
+  vertical-align: middle;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ─── Dimmed / Dependency Labels ─────────────── */
+
+.gameQueueItemDimmed {
+  opacity: 0.45;
+  cursor: not-allowed !important;
+  pointer-events: none;
+}
+
+.dependencyLabel {
+  font-size: 0.5rem;
+  color: #e67e22;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+/* ─── Recurring Badges ───────────────────────── */
+
+.recurringBadge {
+  display: inline-block;
+  font-size: 0.5rem;
+  font-weight: 800;
+  color: #3498db;
+  background: rgba(52, 152, 219, 0.12);
+  padding: 1px 4px;
+  border-radius: 3px;
+  margin-left: 4px;
+  vertical-align: middle;
+}
+
+.recurringGhostBadge {
+  font-size: 0.5625rem;
+  font-weight: 800;
+  color: #3498db;
+  margin-left: 4px;
+}
+
+/* ─── Score Bar ──────────────────────────────── */
+
+.scoreBar {
+  display: flex;
+  align-items: center;
+  padding: 3px 12px;
+  font-size: 0.625rem;
+  font-weight: 700;
+  color: var(--text-secondary, #666);
+  background: rgba(0, 0, 0, 0.02);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  flex-shrink: 0;
+}
+
+/* ─── Interruption Banner ────────────────────── */
+
+.interruptionBanner {
+  position: absolute;
+  top: 28px;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: linear-gradient(135deg, #fff3cd, #ffeeba);
+  border-bottom: 2px solid #f0ad4e;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #856404;
+  z-index: 100;
+  animation: bannerSlideIn 0.35s cubic-bezier(0.17, 0.67, 0.35, 1.2);
+}
+
+@keyframes bannerSlideIn {
+  0%   { transform: translateY(-100%); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+.interruptionEmoji {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.interruptionMsg {
+  flex: 1;
+}
+
+.interruptionDismiss {
+  font-size: 0.6875rem;
+  font-weight: 800;
+  font-family: inherit;
+  padding: 4px 12px;
+  border: none;
+  border-radius: 5px;
+  background: #f0ad4e;
+  color: white;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s ease;
+}
+
+.interruptionDismiss:hover {
+  background: #ec971f;
+}
+
+/* ─── Conflict Resolution Modal ──────────────── */
+
+.conflictOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  0%   { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+.conflictModal {
+  background: white;
+  border-radius: 12px;
+  padding: 18px;
+  width: 260px;
+  max-width: 90%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.conflictTitle {
+  font-size: 0.875rem;
+  font-weight: 800;
+  color: #e74c3c;
+  margin-bottom: 6px;
+}
+
+.conflictDesc {
+  font-size: 0.6875rem;
+  color: var(--text-secondary, #666);
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+.conflictOptions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.conflictOption {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  font-family: inherit;
+  padding: 8px 10px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+  background: white;
+  color: var(--text-dark, #333);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.conflictOption:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.03);
+  transform: translateY(-1px);
+}
+
+.conflictOptionDisabled,
+.conflictOption:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* ─── Chaos Mode ─────────────────────────────── */
+
+.timerBarChaos {
+  animation: chaosPulse 0.5s ease infinite;
+}
+
+@keyframes chaosPulse {
+  0%   { background: rgba(231, 76, 60, 0.1); }
+  50%  { background: rgba(231, 76, 60, 0.25); }
+  100% { background: rgba(231, 76, 60, 0.1); }
+}
+
+.gameQueueChaos {
+  animation: queueFlash 1s ease infinite;
+}
+
+@keyframes queueFlash {
+  0%   { background: var(--color-surface, #fafafa); }
+  50%  { background: rgba(231, 76, 60, 0.05); }
+  100% { background: var(--color-surface, #fafafa); }
+}
+
+/* ─── Trash Penalties ────────────────────────── */
+
+.gameTrashPenalty {
+  font-size: 0.5625rem;
+  font-weight: 800;
+  color: #e74c3c;
+  margin-left: 4px;
+}
+
+.trashShake {
+  animation: trashShake 0.4s ease;
+  border-color: #e74c3c !important;
+  background: rgba(231, 76, 60, 0.08) !important;
+}
+
+@keyframes trashShake {
+  0%   { transform: translateX(0); }
+  20%  { transform: translateX(-6px); }
+  40%  { transform: translateX(6px); }
+  60%  { transform: translateX(-4px); }
+  80%  { transform: translateX(4px); }
+  100% { transform: translateX(0); }
+}
+
+/* ─── Mobile Responsive ──────────────────────── */
+
+@media (max-width: 767px) {
+  .header {
+    padding: 8px 10px;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .headerTitle {
+    font-size: 0.8125rem;
+  }
+
+  .reshuffleBtn {
+    padding: 8px 14px;
+    min-height: 44px;
+    font-size: 0.8125rem;
+  }
+
+  .sortBtn {
+    padding: 12px 20px;
+    min-height: 44px;
+    font-size: 0.875rem;
+  }
+
+  /* Messy view */
+  .messyView {
+    padding: 12px;
+    gap: 12px;
+  }
+
+  .previewGrid {
+    min-height: 140px;
+  }
+
+  /* Game layout: stack grid and queue vertically */
+  .gameBody {
+    flex-direction: column;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .gameBody::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Grid: use full width, smaller cells */
+  .gameGrid {
+    grid-template-columns: 28px repeat(5, 1fr);
+    grid-template-rows: 28px repeat(18, minmax(24px, 1fr));
+    min-height: 460px;
+    flex-shrink: 0;
+    border-right: none;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  }
+
+  .gameTimeLabel {
+    font-size: 0.5rem;
+    padding-top: 1px;
+  }
+
+  .gameDayHeader {
+    font-size: 0.5625rem;
+    min-height: 28px;
+  }
+
+  .gameSlot {
+    min-height: 24px;
+    min-width: 0;
+  }
+
+  .gamePrefilled,
+  .gamePlaced {
+    font-size: 0.5rem;
+    padding: 2px 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Queue panel: horizontal below grid */
+  .gameQueue {
+    width: 100%;
+    max-height: 200px;
+    border-left: none;
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    flex-shrink: 0;
+  }
+
+  .gameQueueList {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding: 4px 10px;
+  }
+
+  .gameQueueList::-webkit-scrollbar {
+    display: none;
+  }
+
+  .gameQueueItem {
+    padding: 8px 10px;
+    min-height: 44px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .gameQueueItemTitle {
+    font-size: 0.75rem;
+  }
+
+  /* Trash zone */
+  .gameTrash {
+    min-height: 44px;
+    margin: 6px 10px;
+    padding: 8px;
+  }
+
+  /* Timer bar */
+  .timerBar {
+    height: 24px;
+  }
+
+  .timerText {
+    font-size: 0.625rem;
+  }
+
+  /* Score bar */
+  .scoreBar {
+    padding: 3px 10px;
+    font-size: 0.5625rem;
+  }
+
+  /* Interruption banner */
+  .interruptionBanner {
+    padding: 8px 10px;
+    font-size: 0.6875rem;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .interruptionDismiss {
+    padding: 8px 14px;
+    min-height: 44px;
+    font-size: 0.75rem;
+  }
+
+  /* Conflict modal */
+  .conflictModal {
+    width: 92%;
+    max-width: 300px;
+    padding: 14px;
+  }
+
+  .conflictOption {
+    padding: 10px 12px;
+    min-height: 44px;
+    font-size: 0.75rem;
+  }
+
+  /* Solved calendar */
+  .solvedGrid {
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .solvedGrid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .solvedTimeCol {
+    width: 28px;
+  }
+
+  .solvedTimeLabel {
+    font-size: 0.5rem;
+  }
+
+  .solvedMeeting {
+    font-size: 0.5rem;
+    padding: 2px 3px;
+  }
+
+  .solvedMeetingTitle {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+  }
+
+  .solvedDayHeader {
+    font-size: 0.5625rem;
+  }
+
+  /* Ghost */
+  .gameGhost {
+    font-size: 0.625rem;
+    padding: 4px 8px;
+  }
+}

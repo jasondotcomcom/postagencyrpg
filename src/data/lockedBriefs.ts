@@ -1,10 +1,72 @@
 import type { Email } from '../types/email';
+import { NG_PLUS_BRIEFS } from './ngPlusBriefs';
+import { loadLegacy } from '../components/Ending/EndingSequence';
 
 export interface LockedBriefEntry {
   unlockAt: number;  // unlock after N completed campaigns
   clientName: string; // for notification copy
   briefId: string;    // matches email id
   buildEmail: () => Email;
+}
+
+// ─── Build NG+ entries based on legacy playthrough count ──────────────────────
+function buildNGPlusEntries(): LockedBriefEntry[] {
+  const legacy = loadLegacy();
+  if (!legacy) return [];
+
+  const run = legacy.playthroughCount; // 1 = first NG+, 2 = second, etc.
+  const entries: LockedBriefEntry[] = [];
+
+  // Tier 1: available on first NG+ (run >= 1), unlock after 4 campaigns
+  if (run >= 1) {
+    NG_PLUS_BRIEFS.filter(b => b.tier === 1).forEach((brief, i) => {
+      entries.push({
+        unlockAt: 4 + i,
+        clientName: brief.clientName,
+        briefId: brief.briefId,
+        buildEmail: brief.buildEmail,
+      });
+    });
+  }
+
+  // Tier 2: available on second NG+ (run >= 2), unlock after 4 campaigns
+  if (run >= 2) {
+    NG_PLUS_BRIEFS.filter(b => b.tier === 2).forEach((brief, i) => {
+      entries.push({
+        unlockAt: 4 + i,
+        clientName: brief.clientName,
+        briefId: brief.briefId,
+        buildEmail: brief.buildEmail,
+      });
+    });
+  }
+
+  // Tier 3: available on third NG+ (run >= 3), unlock after 5 campaigns
+  if (run >= 3) {
+    NG_PLUS_BRIEFS.filter(b => b.tier === 3).forEach((brief, i) => {
+      entries.push({
+        unlockAt: 5 + i,
+        clientName: brief.clientName,
+        briefId: brief.briefId,
+        buildEmail: brief.buildEmail,
+      });
+    });
+  }
+
+  // Meta brief: available on any NG+ run, unlocks after 7 campaigns
+  if (run >= 1) {
+    const meta = NG_PLUS_BRIEFS.find(b => b.tier === 'meta');
+    if (meta) {
+      entries.push({
+        unlockAt: 7,
+        clientName: meta.clientName,
+        briefId: meta.briefId,
+        buildEmail: meta.buildEmail,
+      });
+    }
+  }
+
+  return entries;
 }
 
 export const LOCKED_BRIEFS: LockedBriefEntry[] = [
@@ -399,4 +461,6 @@ Pat`,
     }),
   },
 
+  // ─── NG+ Dystopian Briefs (conditionally included based on playthrough) ─────
+  ...buildNGPlusEntries(),
 ];

@@ -351,3 +351,21 @@
   background: #ef4444;
   color: white;
 }
+
+/* ─── Mobile overrides ───────────────────────────────────────────────────── */
+@media (max-width: 767px) {
+  .generationPhase {
+    height: auto;
+    min-height: 0;
+  }
+
+  .microGamesArea {
+    height: 320px;
+    max-height: 320px;
+  }
+
+  .deliverableList {
+    max-height: none;
+    -webkit-overflow-scrolling: touch;
+  }
+}
