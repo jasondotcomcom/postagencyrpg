@@ -3,6 +3,7 @@ import type { Campaign, Deliverable } from '../../../types/campaign';
 import { DELIVERABLE_TYPES, PLATFORMS, STATUS_DISPLAY } from '../../../types/campaign';
 import { useCampaignContext } from '../../../context/CampaignContext';
 import { getTeamMembers } from '../../../data/team';
+import { getQuickGet } from '../../../utils/contentFormatter';
 import styles from './WorkReviewModal.module.css';
 
 interface WorkReviewModalProps {
@@ -28,6 +29,7 @@ export default function WorkReviewModal({
   const { approveDeliverable, requestRevision } = useCampaignContext();
   const [feedback, setFeedback] = useState('');
   const [showFeedbackForm, setShowFeedbackForm] = useState(false);
+  const [showFull, setShowFull] = useState(false);
 
   const typeInfo = DELIVERABLE_TYPES[deliverable.type];
   const platformInfo = PLATFORMS[deliverable.platform];
@@ -81,7 +83,20 @@ export default function WorkReviewModal({
         <div className={styles.content}>
           <div className={styles.workPreview}>
             <div className={styles.previewHeader}>
-              <span className={styles.previewLabel}>Generated Work</span>
+              <div className={styles.viewToggle}>
+                <button
+                  className={`${styles.toggleTab} ${!showFull ? styles.activeTab : ''}`}
+                  onClick={() => setShowFull(false)}
+                >
+                  Quick Get
+                </button>
+                <button
+                  className={`${styles.toggleTab} ${showFull ? styles.activeTab : ''}`}
+                  onClick={() => setShowFull(true)}
+                >
+                  Full Version
+                </button>
+              </div>
               {work.revisionNumber > 1 && (
                 <span className={styles.revisionBadge}>
                   Revision #{work.revisionNumber}
@@ -89,9 +104,15 @@ export default function WorkReviewModal({
               )}
             </div>
             <div className={styles.previewContent}>
-              {work.content.split('\n').map((line, i) => (
-                <p key={i} className={styles.previewLine}>{line || '\u00A0'}</p>
-              ))}
+              {showFull ? (
+                work.content.split('\n').map((line, i) => (
+                  <p key={i} className={styles.previewLine}>{line || '\u00A0'}</p>
+                ))
+              ) : (
+                <p className={styles.previewLine}>
+                  {getQuickGet(work.preview, work.content, deliverable.type)}
+                </p>
+              )}
             </div>
           </div>
 

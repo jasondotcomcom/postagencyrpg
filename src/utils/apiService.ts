@@ -23,7 +23,7 @@ async function generateDeliverableText(
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       model: 'claude-sonnet-4-5-20250929',
-      max_tokens: 3500,
+      max_tokens: 3800,
       messages: [{ role: 'user', content: prompt }],
     }),
   });
@@ -111,13 +111,21 @@ function getSizeForDeliverableType(
 
 // ─── Main Orchestrator ───────────────────────────────────────────────────────
 
+function extractQuickGet(text: string): { preview: string | undefined; content: string } {
+  const match = text.match(/^QUICK GET:\s*([\s\S]*?)\n---\s*\n([\s\S]*)$/);
+  if (match) {
+    return { preview: match[1].trim(), content: match[2].trim() };
+  }
+  return { preview: undefined, content: text };
+}
+
 export async function generateDeliverable(
   deliverable: { type: DeliverableType; platform: Platform; description: string },
   campaign: Campaign,
   concept: CampaignConcept,
   feedback?: string,
   retryCount = 0
-): Promise<{ content: string; imageUrl?: string }> {
+): Promise<{ content: string; imageUrl?: string; preview?: string }> {
   try {
     const textContent = await generateDeliverableText(
       deliverable,
@@ -126,9 +134,11 @@ export async function generateDeliverable(
       feedback
     );
 
+    const { preview, content } = extractQuickGet(textContent);
+
     let imageUrl: string | undefined;
     try {
-      const visualDesc = extractVisualDescription(textContent);
+      const visualDesc = extractVisualDescription(content);
       if (visualDesc) {
         imageUrl = await generateDeliverableImage(visualDesc, deliverable.type);
       }
@@ -136,7 +146,7 @@ export async function generateDeliverable(
       // Image failure is non-fatal
     }
 
-    return { content: textContent, imageUrl };
+    return { content, imageUrl, preview };
   } catch (error) {
     if (retryCount < 1) {
       await new Promise((r) => setTimeout(r, 1000));
@@ -189,10 +199,13 @@ PLATFORM: ${platform}
 
   const typePrompt = getTypeSpecificPrompt(type, platform);
 
-  return `You are a world-class creative team at an advertising agency. Generate content for the following deliverable.
+  return `You are a world-class creative team at an advertising agency. Generate content for the following deliverable. Write deliverables that are immediately compelling. The reader should understand what this is and why it's exciting within the first two sentences. Avoid vague setup language — lead with the idea, not the context. Be specific and vivid. Then go deep.
 
 ${context}
 ${revisionNote}
+
+Begin your response with "QUICK GET:" followed by a 2-3 sentence elevator pitch of what this deliverable IS and why it's exciting. Be specific and vivid. Lead with the idea, not context. Then write "---" on its own line and proceed with the full content.
+
 ${typePrompt}
 
 End your response with a section labeled "VISUAL DESCRIPTION:" that describes a single compelling image to accompany this deliverable. Be specific about composition, colors, mood, style, lighting, and subject matter. This description will be used to generate the image via AI. Do NOT include any text or words in the visual description — describe only the visual elements.`;

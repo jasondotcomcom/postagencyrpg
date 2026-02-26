@@ -133,6 +133,7 @@ export interface Campaign {
   selectedConceptId: string | null;
   // Execution phase
   deliverables: Deliverable[];
+  productionTeam?: AssignedTeam | null;
   // Completion
   submittedAt?: Date;
   clientScore?: number;

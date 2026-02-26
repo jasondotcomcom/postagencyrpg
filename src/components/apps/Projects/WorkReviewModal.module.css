@@ -141,6 +141,39 @@
   color: var(--text-secondary);
 }
 
+.viewToggle {
+  display: flex;
+  gap: 2px;
+  background: rgba(0, 0, 0, 0.06);
+  border-radius: 8px;
+  padding: 2px;
+}
+
+.toggleTab {
+  padding: 6px 14px;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.toggleTab:hover {
+  color: var(--text-dark);
+}
+
+.activeTab {
+  background: white;
+  color: var(--text-dark);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
 .revisionBadge {
   font-size: 0.6875rem;
   font-weight: 600;

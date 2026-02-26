@@ -91,3 +91,28 @@ export function stripTrailingVisualDescription(raw: string): string {
   if (index === -1) return raw;
   return raw.substring(0, index).trimEnd();
 }
+
+export function getQuickGet(preview: string | undefined, content: string, type: string): string {
+  if (preview) return preview;
+  if (isVideoType(type)) return generateScriptSummary(content);
+  // Fallback: first 2-3 sentences
+  const stripped = stripTrailingVisualDescription(content);
+  const sentences = stripped.split(/(?<=[.!?])\s+/).slice(0, 3);
+  return sentences.join(' ');
+}
+
+function generateScriptSummary(content: string): string {
+  const stripped = stripTrailingVisualDescription(content);
+  // Extract key visual and audio beats from shot-based scripts
+  const shots = stripped.match(/━━━\s*SHOT\s*\d+[^━]*/gi) || [];
+  if (shots.length > 0) {
+    const beats = shots.slice(0, 3).map(shot => {
+      const visualMatch = shot.match(/VISUAL:\s*(.+)/i);
+      return visualMatch ? visualMatch[1].trim().split('.')[0] : '';
+    }).filter(Boolean);
+    if (beats.length > 0) return beats.join('. ') + '.';
+  }
+  // Fallback: first 2-3 sentences
+  const sentences = stripped.split(/(?<=[.!?])\s+/).slice(0, 3);
+  return sentences.join(' ');
+}

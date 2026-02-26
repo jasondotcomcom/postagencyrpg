@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import type { Campaign } from '../../../types/campaign';
 import { DELIVERABLE_TYPES, PLATFORMS, formatBudget } from '../../../types/campaign';
 import { useCampaignContext } from '../../../context/CampaignContext';
-import { parseContent, isVideoType, stripTrailingVisualDescription } from '../../../utils/contentFormatter';
+import { parseContent, isVideoType, stripTrailingVisualDescription, getQuickGet } from '../../../utils/contentFormatter';
 import styles from './ReviewMeeting.module.css';
 
 interface ReviewMeetingProps {
@@ -17,6 +17,7 @@ export default function ReviewMeeting({ campaign }: ReviewMeetingProps): React.R
   const [view, setView] = useState<ReviewView>('slides');
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedbackText, setFeedbackText] = useState('');
+  const [showFull, setShowFull] = useState(false);
 
   const deliverables = campaign.deliverables;
   const currentDel = deliverables[currentSlide];
@@ -36,10 +37,12 @@ export default function ReviewMeeting({ campaign }: ReviewMeetingProps): React.R
       setCurrentSlide(prev => prev + 1);
       setShowFeedback(false);
       setFeedbackText('');
+      setShowFull(false);
     } else if (e.key === 'ArrowLeft' && currentSlide > 0) {
       setCurrentSlide(prev => prev - 1);
       setShowFeedback(false);
       setFeedbackText('');
+      setShowFull(false);
     }
   }, [currentSlide, deliverables.length, view]);
 
@@ -60,6 +63,7 @@ export default function ReviewMeeting({ campaign }: ReviewMeetingProps): React.R
     approveInReview(campaign.id, currentDel.id);
     setShowFeedback(false);
     setFeedbackText('');
+    setShowFull(false);
     // Auto-advance to next unreviewed slide
     if (currentSlide < deliverables.length - 1) {
       setTimeout(() => setCurrentSlide(prev => prev + 1), 300);
@@ -76,6 +80,7 @@ export default function ReviewMeeting({ campaign }: ReviewMeetingProps): React.R
     flagInReview(campaign.id, currentDel.id, feedbackText.trim());
     setShowFeedback(false);
     setFeedbackText('');
+    setShowFull(false);
     if (currentSlide < deliverables.length - 1) {
       setTimeout(() => setCurrentSlide(prev => prev + 1), 300);
     }
@@ -203,7 +208,7 @@ export default function ReviewMeeting({ campaign }: ReviewMeetingProps): React.R
                 del.status === 'needs_revision' ? styles.flagged :
                 del.status === 'ready_for_review' ? styles.reviewed : ''
               }`}
-              onClick={() => { setCurrentSlide(i); setShowFeedback(false); setFeedbackText(''); }}
+              onClick={() => { setCurrentSlide(i); setShowFeedback(false); setFeedbackText(''); setShowFull(false); }}
             />
           ))}
         </div>
@@ -240,21 +245,45 @@ export default function ReviewMeeting({ campaign }: ReviewMeetingProps): React.R
               )}
               <div className={styles.splitContent}>
                 {currentDel.generatedWork?.content ? (
-                  isVideoType(currentDel.type) ? (
-                    <div className={styles.videoScript}>
-                      {stripTrailingVisualDescription(currentDel.generatedWork.content)}
+                  <>
+                    <div className={styles.viewToggle}>
+                      <button
+                        className={`${styles.toggleTab} ${!showFull ? styles.activeTab : ''}`}
+                        onClick={() => setShowFull(false)}
+                      >
+                        Quick Get
+                      </button>
+                      <button
+                        className={`${styles.toggleTab} ${showFull ? styles.activeTab : ''}`}
+                        onClick={() => setShowFull(true)}
+                      >
+                        Full Version
+                      </button>
                     </div>
-                  ) : (
-                    <div className={styles.contentPreview}>
-                      {parseContent(currentDel.generatedWork.content).map((section, idx) =>
-                        section.type === 'header' ? (
-                          <div key={idx} className={styles.contentHeader}>{section.content}</div>
-                        ) : (
-                          <div key={idx} className={styles.contentText}>{section.content}</div>
-                        )
-                      )}
-                    </div>
-                  )
+                    {showFull ? (
+                      isVideoType(currentDel.type) ? (
+                        <div className={styles.videoScript}>
+                          {stripTrailingVisualDescription(currentDel.generatedWork.content)}
+                        </div>
+                      ) : (
+                        <div className={styles.contentPreview}>
+                          {parseContent(currentDel.generatedWork.content).map((section, idx) =>
+                            section.type === 'header' ? (
+                              <div key={idx} className={styles.contentHeader}>{section.content}</div>
+                            ) : (
+                              <div key={idx} className={styles.contentText}>{section.content}</div>
+                            )
+                          )}
+                        </div>
+                      )
+                    ) : (
+                      <div className={styles.contentPreview}>
+                        <div className={styles.contentText}>
+                          {getQuickGet(currentDel.generatedWork.preview, currentDel.generatedWork.content, currentDel.type)}
+                        </div>
+                      </div>
+                    )}
+                  </>
                 ) : (
                   <div className={styles.contentPreview}>No content generated.</div>
                 )}
@@ -287,7 +316,7 @@ export default function ReviewMeeting({ campaign }: ReviewMeetingProps): React.R
           <div className={styles.navigation}>
             <button
               className={styles.navButton}
-              onClick={() => { setCurrentSlide(prev => prev - 1); setShowFeedback(false); setFeedbackText(''); }}
+              onClick={() => { setCurrentSlide(prev => prev - 1); setShowFeedback(false); setFeedbackText(''); setShowFull(false); }}
               disabled={currentSlide === 0}
             >
               ← Prev
@@ -317,6 +346,7 @@ export default function ReviewMeeting({ campaign }: ReviewMeetingProps): React.R
                   setCurrentSlide(prev => prev + 1);
                   setShowFeedback(false);
                   setFeedbackText('');
+                  setShowFull(false);
                 }
               }}
               disabled={currentSlide === deliverables.length - 1 && !allReviewed}

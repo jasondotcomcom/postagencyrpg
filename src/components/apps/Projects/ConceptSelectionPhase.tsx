@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
-import type { Campaign, CampaignConcept } from '../../../types/campaign';
-import { DELIVERABLE_TYPES, PLATFORMS } from '../../../types/campaign';
+import React, { useState, useMemo } from 'react';
+import type { Campaign, CampaignConcept, DeliverableType } from '../../../types/campaign';
+import { DELIVERABLE_TYPES, PLATFORMS, calculateTeamCost, formatBudget } from '../../../types/campaign';
 import { useCampaignContext } from '../../../context/CampaignContext';
 import { useChatContext } from '../../../context/ChatContext';
+import { teamMembers } from '../../../data/team';
 import styles from './ConceptSelectionPhase.module.css';
 
 interface ConceptSelectionPhaseProps {
@@ -10,7 +11,7 @@ interface ConceptSelectionPhaseProps {
 }
 
 export default function ConceptSelectionPhase({ campaign }: ConceptSelectionPhaseProps): React.ReactElement {
-  const { selectConcept, generateCampaignDeliverables, generateConcepts, tweakConcept, isGeneratingConcepts } = useCampaignContext();
+  const { selectConcept, generateCampaignDeliverables, generateConcepts, tweakConcept, setProductionTeam, isGeneratingConcepts } = useCampaignContext();
   const { triggerCampaignEvent } = useChatContext();
   const [showReviseModal, setShowReviseModal] = useState(false);
   const [revisionFeedback, setRevisionFeedback] = useState('');
@@ -18,9 +19,26 @@ export default function ConceptSelectionPhase({ campaign }: ConceptSelectionPhas
   const [tweakModalConceptId, setTweakModalConceptId] = useState<string | null>(null);
   const [tweakNote, setTweakNote] = useState('');
   const [tweakingConceptId, setTweakingConceptId] = useState<string | null>(null);
+  const [productionMemberIds, setProductionMemberIds] = useState<string[]>([]);
 
   const selectedConceptId = campaign.selectedConceptId;
   const selectedConcept = campaign.generatedConcepts.find(c => c.id === selectedConceptId);
+
+  const conceptingIds = campaign.conceptingTeam?.memberIds || [];
+  const availableMembers = useMemo(
+    () => teamMembers.filter(m => m.id !== 'hr' && !conceptingIds.includes(m.id)),
+    [conceptingIds]
+  );
+
+  const VISUAL_HEAVY_TYPES: DeliverableType[] = ['print_ad', 'billboard', 'video', 'tiktok_series', 'social_post', 'landing_page', 'experiential', 'guerrilla'];
+  const hasVisualDeliverables = selectedConcept?.suggestedDeliverables.some(d => VISUAL_HEAVY_TYPES.includes(d.type)) ?? false;
+
+  const conceptingCount = conceptingIds.length;
+  const additionalCost = productionMemberIds.length > 0
+    ? calculateTeamCost(conceptingCount + productionMemberIds.length) - calculateTeamCost(conceptingCount)
+    : 0;
+  const updatedProductionBudget = campaign.productionBudget - additionalCost;
+  const budgetNegative = updatedProductionBudget < 0;
 
   const handleSelectConcept = (conceptId: string) => {
     selectConcept(campaign.id, conceptId);
@@ -33,17 +51,28 @@ export default function ConceptSelectionPhase({ campaign }: ConceptSelectionPhas
 
   const handleConfirmGenerate = () => {
     setShowConfirmation(false);
+    if (productionMemberIds.length > 0) {
+      setProductionTeam(campaign.id, productionMemberIds);
+    }
     triggerCampaignEvent('CONCEPT_CHOSEN', {
       campaignName: campaign.campaignName,
       clientName: campaign.clientName,
     });
-    generateCampaignDeliverables(campaign.id);
+    generateCampaignDeliverables(campaign.id, productionMemberIds.length > 0 ? productionMemberIds : undefined);
     setTimeout(() => {
       triggerCampaignEvent('DELIVERABLES_GENERATING', {
         campaignName: campaign.campaignName,
         clientName: campaign.clientName,
       });
     }, 8000);
+  };
+
+  const handleToggleProductionMember = (memberId: string) => {
+    setProductionMemberIds(prev =>
+      prev.includes(memberId)
+        ? prev.filter(id => id !== memberId)
+        : [...prev, memberId]
+    );
   };
 
   const handleRevise = async () => {
@@ -149,6 +178,58 @@ export default function ConceptSelectionPhase({ campaign }: ConceptSelectionPhas
                 </span>
               </div>
             ))}
+          </div>
+
+          {/* Production Crew Selector */}
+          <div className={styles.productionCrewSection}>
+            <div className={styles.currentTeam}>
+              <span className={styles.ideaLabel}>Current Team</span>
+              <div className={styles.channels}>
+                {conceptingIds.map(id => {
+                  const member = teamMembers.find(m => m.id === id);
+                  return member ? (
+                    <span key={id} className={styles.teamChip}>
+                      {member.avatar} {member.name}
+                    </span>
+                  ) : null;
+                })}
+              </div>
+            </div>
+
+            {availableMembers.length > 0 && (
+              <div className={styles.availableMembers}>
+                <span className={styles.ideaLabel}>Need extra hands?</span>
+                {availableMembers.map(member => {
+                  const isRecommended = hasVisualDeliverables && (member.id === 'copywriter' || member.id === 'contractor');
+                  return (
+                    <label key={member.id} className={styles.memberToggle}>
+                      <input
+                        type="checkbox"
+                        checked={productionMemberIds.includes(member.id)}
+                        onChange={() => handleToggleProductionMember(member.id)}
+                      />
+                      <div className={styles.memberInfo}>
+                        <span>{member.avatar} {member.name}</span>
+                        <span className={styles.detailValue}>{member.role}</span>
+                        {isRecommended && <span className={styles.recommendedBadge}>Recommended</span>}
+                      </div>
+                    </label>
+                  );
+                })}
+              </div>
+            )}
+
+            {productionMemberIds.length > 0 && (
+              <div className={styles.costPreview}>
+                <span>Additional team cost: {formatBudget(additionalCost)}</span>
+                <span>Updated production budget: <strong className={budgetNegative ? styles.costWarning : ''}>{formatBudget(updatedProductionBudget)}</strong></span>
+              </div>
+            )}
+            {budgetNegative && (
+              <p className={styles.costWarning} style={{ margin: '4px 0 0 0' }}>
+                Warning: production budget will go negative
+              </p>
+            )}
           </div>
 
           <p className={styles.confirmationNote}>

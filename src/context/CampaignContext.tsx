@@ -51,7 +51,8 @@ type CampaignAction =
   | { type: 'COMPLETE_CAMPAIGN'; payload: { campaignId: string; score: number; feedback: string } }
   | { type: 'SET_DELIVERABLE_GENERATION_FAILED'; payload: { campaignId: string; deliverableId: string; error: string } }
   | { type: 'UPDATE_CONCEPT'; payload: { campaignId: string; conceptId: string; concept: CampaignConcept } }
-  | { type: 'RECORD_TOOL_USED'; payload: { campaignId: string; toolId: string } };
+  | { type: 'RECORD_TOOL_USED'; payload: { campaignId: string; toolId: string } }
+  | { type: 'SET_PRODUCTION_TEAM'; payload: { campaignId: string; memberIds: string[] } };
 
 // Initial state
 const initialState: CampaignState = {
@@ -525,6 +526,27 @@ function campaignReducer(state: CampaignState, action: CampaignAction): Campaign
       };
     }
 
+    case 'SET_PRODUCTION_TEAM': {
+      const { campaignId, memberIds } = action.payload;
+      return {
+        ...state,
+        campaigns: state.campaigns.map(campaign => {
+          if (campaign.id !== campaignId) return campaign;
+          const conceptingCount = campaign.conceptingTeam?.memberIds.length || 0;
+          const totalCount = conceptingCount + memberIds.length;
+          const newTeamFee = calculateTeamCost(totalCount);
+          return {
+            ...campaign,
+            productionTeam: memberIds.length > 0
+              ? { memberIds, cost: newTeamFee - calculateTeamCost(conceptingCount) }
+              : null,
+            teamFee: newTeamFee,
+            productionBudget: campaign.clientBudget - newTeamFee,
+          };
+        }),
+      };
+    }
+
     default:
       return state;
   }
@@ -539,7 +561,8 @@ interface CampaignContextValue extends CampaignState {
   generateConcepts: (campaignId: string) => Promise<void>;
   tweakConcept: (campaignId: string, conceptId: string, tweakNote: string) => Promise<void>;
   selectConcept: (campaignId: string, conceptId: string) => void;
-  generateCampaignDeliverables: (campaignId: string) => Promise<void>;
+  setProductionTeam: (campaignId: string, memberIds: string[]) => void;
+  generateCampaignDeliverables: (campaignId: string, productionMemberIds?: string[]) => Promise<void>;
   approveInReview: (campaignId: string, deliverableId: string) => void;
   flagInReview: (campaignId: string, deliverableId: string, feedback: string) => void;
   requestRevisions: (campaignId: string) => Promise<void>;
@@ -634,12 +657,24 @@ export function CampaignProvider({ children }: CampaignProviderProps): React.Rea
     dispatch({ type: 'SELECT_CONCEPT', payload: { campaignId, conceptId } });
   }, []);
 
-  const generateCampaignDeliverables = useCallback(async (campaignId: string) => {
+  const setProductionTeam = useCallback((campaignId: string, memberIds: string[]) => {
+    dispatch({ type: 'SET_PRODUCTION_TEAM', payload: { campaignId, memberIds } });
+  }, []);
+
+  const generateCampaignDeliverables = useCallback(async (campaignId: string, productionMemberIds?: string[]) => {
     const campaign = state.campaigns.find(c => c.id === campaignId);
     if (!campaign) return;
 
     const selectedConcept = campaign.generatedConcepts.find(c => c.id === campaign.selectedConceptId);
     if (!selectedConcept) return;
+
+    // Merge concepting + production teams
+    const conceptingIds = campaign.conceptingTeam?.memberIds || [];
+    const prodIds = productionMemberIds || [];
+    const allMemberIds = [...conceptingIds, ...prodIds];
+    const mergedTeam = allMemberIds.length > 0
+      ? { memberIds: allMemberIds, cost: calculateTeamCost(allMemberIds.length) }
+      : campaign.conceptingTeam;
 
     // Build deliverables list ONCE, shared between reducer and async loop
     const deliverables: Deliverable[] = selectedConcept.suggestedDeliverables.flatMap(
@@ -648,7 +683,7 @@ export function CampaignProvider({ children }: CampaignProviderProps): React.Rea
         type: suggestion.type,
         platform: suggestion.platform,
         description: suggestion.description,
-        assignedTeam: campaign.conceptingTeam,
+        assignedTeam: mergedTeam,
         status: 'not_started' as DeliverableStatus,
         productionCost: getProductionCost(suggestion.type),
         generatedWork: null,
@@ -678,6 +713,7 @@ export function CampaignProvider({ children }: CampaignProviderProps): React.Rea
         const work: GeneratedWork = {
           id: `work-${Date.now()}-${i}`,
           content: result.content,
+          preview: result.preview,
           imageUrl: result.imageUrl,
           generatedAt: new Date(),
           revisionNumber: 1,
@@ -737,6 +773,7 @@ export function CampaignProvider({ children }: CampaignProviderProps): React.Rea
         const work: GeneratedWork = {
           id: `work-${Date.now()}-rev-${i}`,
           content: result.content,
+          preview: result.preview,
           imageUrl: result.imageUrl,
           generatedAt: new Date(),
           revisionNumber: (del.generatedWork?.revisionNumber || 0) + 1,
@@ -812,6 +849,7 @@ export function CampaignProvider({ children }: CampaignProviderProps): React.Rea
         const work: GeneratedWork = {
           id: `work-${Date.now()}`,
           content: result.content,
+          preview: result.preview,
           imageUrl: result.imageUrl,
           generatedAt: new Date(),
           revisionNumber: (deliverable.generatedWork?.revisionNumber || 0) + 1,
@@ -900,6 +938,7 @@ export function CampaignProvider({ children }: CampaignProviderProps): React.Rea
       const work: GeneratedWork = {
         id: `work-${Date.now()}-retry`,
         content: result.content,
+        preview: result.preview,
         imageUrl: result.imageUrl,
         generatedAt: new Date(),
         revisionNumber: (deliverable.generatedWork?.revisionNumber || 0) + 1,
@@ -937,6 +976,7 @@ export function CampaignProvider({ children }: CampaignProviderProps): React.Rea
     generateConcepts,
     tweakConcept,
     selectConcept,
+    setProductionTeam,
     generateCampaignDeliverables,
     approveInReview,
     flagInReview,
