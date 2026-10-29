@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useRef } from 'react';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -200,23 +200,25 @@ export function AchievementProvider({ children }: { children: React.ReactNode })
     return unlockedAchievements.includes(id);
   }, [unlockedAchievements]);
 
+  // Counters live in a ref so incrementCounter can return the new value
+  // synchronously. (Reading it out of a setState updater doesn't work: React 18
+  // defers the updater, so the old code usually returned 0.)
+  const countersRef = useRef<Record<string, number>>(counters);
+
   const incrementCounter = useCallback((key: string): number => {
-    let newVal = 0;
-    setCounters(prev => {
-      newVal = (prev[key] ?? 0) + 1;
-      const updated = { ...prev, [key]: newVal };
-      try { localStorage.setItem(COUNTERS_KEY, JSON.stringify(updated)); } catch { /* non-fatal */ }
-      return updated;
-    });
+    const newVal = (countersRef.current[key] ?? 0) + 1;
+    const updated = { ...countersRef.current, [key]: newVal };
+    countersRef.current = updated;
+    try { localStorage.setItem(COUNTERS_KEY, JSON.stringify(updated)); } catch { /* non-fatal */ }
+    setCounters(updated);
     return newVal;
   }, []);
 
   const resetCounter = useCallback((key: string): void => {
-    setCounters(prev => {
-      const updated = { ...prev, [key]: 0 };
-      try { localStorage.setItem(COUNTERS_KEY, JSON.stringify(updated)); } catch { /* non-fatal */ }
-      return updated;
-    });
+    const updated = { ...countersRef.current, [key]: 0 };
+    countersRef.current = updated;
+    try { localStorage.setItem(COUNTERS_KEY, JSON.stringify(updated)); } catch { /* non-fatal */ }
+    setCounters(updated);
   }, []);
 
   const getCounter = useCallback((key: string): number => {
