@@ -3,102 +3,14 @@ import { useChatContext } from '../../../context/ChatContext';
 import { useAchievementContext } from '../../../context/AchievementContext';
 import { useConductContext } from '../../../context/ConductContext';
 import type { MoraleLevel } from '../../../types/chat';
+import { usePlayerContext } from '../../../context/PlayerContext';
+import { planReply, generateReply, replyDelays } from '../../../utils/chatEngine';
 import styles from './MessageInput.module.css';
 
-// ─── Sentiment Analysis ───────────────────────────────────────────────────────
-
-interface SentimentResult {
-  sentiment: 'supportive' | 'encouraging' | 'neutral' | 'dismissive' | 'harsh';
-  moraleImpact: 'up' | 'same' | 'down';
-  reactions: Array<{ authorId: string; text: string; delay: number }>;
-  summary: string;
-}
-
-async function analyzeSentiment(
-  playerMessage: string,
-  recentMessages: Array<{ authorId: string; text: string }>,
-  currentMorale: MoraleLevel,
-): Promise<SentimentResult> {
-  const recentContext = recentMessages
-    .slice(-4)
-    .map(m => `${m.authorId}: ${m.text}`)
-    .join('\n');
-
-  const prompt = `You are analyzing a creative director's message to their ad agency team.
-
-Recent chat:
-${recentContext || '(no recent messages)'}
-
-Director says: "${playerMessage}"
-Current team morale: ${currentMorale}
-
-Classify the message tone and return ONLY valid JSON (no markdown):
-{
-  "sentiment": "supportive|encouraging|neutral|dismissive|harsh",
-  "moraleImpact": "up|same|down",
-  "reactions": [
-    { "authorId": "copywriter", "text": "Short team reaction message (1-2 sentences)", "delay": 2000 }
-  ],
-  "summary": "One-line description of morale effect"
-}
-
-GUIDELINES:
-- supportive (empathetic, offers help/breaks, acknowledges effort) → moraleImpact: "up"
-- encouraging (positive, forward-looking, praises work quality) → moraleImpact: "up"
-- perspective-giving (acknowledges effort + reframes with customer/business lens) → moraleImpact: "up"
-- neutral (purely informational, no acknowledgment of feelings or effort) → moraleImpact: "same"
-- dismissive (minimises concerns without acknowledgment, pushy, changes subject) → moraleImpact: "down"
-- harsh (blames, aggressive, "suck it up") → moraleImpact: "down"
-
-CRITICAL — PERSPECTIVE-GIVING IS SUPPORTIVE, NOT NEUTRAL OR DISMISSIVE:
-Good leaders after a mid-range score (e.g. 70-79) will:
-  1. Acknowledge the work quality ("smart work", "strong effort", "good job")
-  2. Provide perspective on what actually matters (customer satisfaction, client happiness)
-  3. Show appreciation ("appreciate the work", "proud of you all")
-This is SUPPORTIVE (+up), even if it doesn't directly address team disappointment with the score.
-
-EXAMPLE — mark as "supportive", moraleImpact: "up":
-  "I think the work was very smart and it will really please the customers. Appreciate all the work you put in"
-  → Acknowledges quality + customer-focused perspective + appreciation = good leadership
-
-ACTUALLY DISCONNECTED/DISMISSIVE (moraleImpact: "down") means:
-  - "Doesn't matter, move on" (no acknowledgment)
-  - "I don't care about the score" (ignores team feelings entirely)
-  - "Why are you upset? Client paid us." (tone-deaf, no empathy)
-  - Changing subject with zero acknowledgment of effort
-
-KEY TEST: Did the director acknowledge the work OR show appreciation OR provide meaningful perspective?
-  YES → at minimum "neutral", usually "supportive" → moraleImpact: "same" or "up"
-  NO (pure avoidance/dismissal) → "dismissive" → moraleImpact: "down"
-
-Include 1-2 reactions from: copywriter, strategist, suit, pm, vance, hr, contractor
-Team personalities (for authentic reactions):
-- copywriter: cautious, compliance-minded, avoids conflict
-- strategist: analytical, data-driven, speaks in metrics
-- suit: overly positive, buzzword-heavy, always "aligns with objectives"
-- pm: task-focused, mentions timelines and capacity
-- vance: uses jargon, talks about "synergies" and "leverage"
-- hr: cheerful, mentions policy, always "circling back"
-- contractor: terse, professional, signs off formally
-Reactions should sound natural and corporate. Delays: first at 2000-3000ms, second at 4000-6000ms.`;
-
-  const response = await fetch('/api/anthropic/v1/messages', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-5-20250929',
-      max_tokens: 400,
-      messages: [{ role: 'user', content: prompt }],
-    }),
-  });
-
-  if (!response.ok) throw new Error(`API error ${response.status}`);
-
-  const data = await response.json();
-  const text: string = data.content[0].text;
-  const cleaned = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-  return JSON.parse(cleaned) as SentimentResult;
-}
+// ─── Team replies ─────────────────────────────────────────────────────────────
+// The shape of each reply (how many people answer, who, what they do, how
+// long) is planned in utils/chatEngine; the model only writes the words and
+// classifies the player's message for morale.
 
 function nextMorale(current: MoraleLevel, impact: 'up' | 'same' | 'down'): MoraleLevel {
   const levels: MoraleLevel[] = ['mutiny', 'toxic', 'low', 'medium', 'high'];
@@ -111,7 +23,9 @@ function nextMorale(current: MoraleLevel, impact: 'up' | 'same' | 'down'): Moral
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function MessageInput(): React.ReactElement {
-  const { activeChannel, channels, messages, morale, addMessage, setMorale } = useChatContext();
+  const { activeChannel, channels, messages, morale, addMessage, addReaction, setMorale, setTypingAuthorId } = useChatContext();
+  const { playerName } = usePlayerContext();
+  const firstName = (playerName ?? '').trim().split(/\s+/)[0] || 'there';
   const { unlockAchievement, incrementCounter, resetCounter } = useAchievementContext();
   const { reportIncident, reportCorporate } = useConductContext();
   const [text, setText] = useState('');
@@ -174,8 +88,9 @@ export default function MessageInput(): React.ReactElement {
     // ──────────────────────────────────────────────────────────────────────
 
     // Post player message immediately
+    const playerMsgId = `msg-${Date.now()}-player`;
     addMessage({
-      id: `msg-${Date.now()}-player`,
+      id: playerMsgId,
       channel: activeChannel,
       authorId: 'player',
       text: trimmed,
@@ -186,13 +101,29 @@ export default function MessageInput(): React.ReactElement {
     setText('');
     setIsAnalyzing(true);
 
+    // Plan who (if anyone) replies before the model call, so the right person
+    // starts "typing" straight away.
+    const sentAt = Date.now();
+    const sendChannel = activeChannel;
+    const plan = planReply(trimmed);
+    const firstResponder = plan.slots[0]?.authorId ?? null;
+    const typingTimer = firstResponder ? setTimeout(() => setTypingAuthorId(firstResponder), 600) : undefined;
+
     try {
       const recentMsgs = messages
         .filter(m => m.channel === activeChannel)
-        .slice(-6)
+        .slice(-20)
         .map(m => ({ authorId: m.authorId, text: m.text }));
 
-      const result = await analyzeSentiment(trimmed, recentMsgs, morale);
+      const result = await generateReply({
+        playerName: firstName,
+        playerMessage: trimmed,
+        channelId: activeChannel,
+        recent: recentMsgs,
+        morale,
+        plan,
+      });
+      const elapsed = Date.now() - sentAt;
 
       // Apply morale change
       const newMorale = nextMorale(morale, result.moraleImpact);
@@ -210,26 +141,41 @@ export default function MessageInput(): React.ReactElement {
         showNotif('😐', result.summary || 'Team morale decreased');
       }
 
-      // Schedule team reactions
-      result.reactions?.forEach(reaction => {
+      // Emoji reaction on the player's message (sometimes the only response).
+      if (plan.reactor && result.emoji && typeof result.emoji === 'string' && result.emoji.length <= 8) {
+        const emoji = result.emoji;
+        setTimeout(() => addReaction(playerMsgId, emoji), Math.max(400, 1500 - elapsed) + Math.random() * 1500);
+      }
+
+      // Schedule replies from send time, so API latency is absorbed into the
+      // "typing" pause instead of added on top of it.
+      const replies = result.replies;
+      clearTimeout(typingTimer);
+      setTypingAuthorId(replies[0]?.authorId ?? null);
+      const delays = replyDelays(replies);
+      replies.forEach((reply, i) => {
+        const fireAt = Math.max(350 * (i + 1), delays[i] - elapsed);
         setTimeout(() => {
+          setTypingAuthorId(i < replies.length - 1 ? replies[i + 1].authorId : null);
           addMessage({
-            id: `msg-${Date.now()}-${reaction.authorId}-${Math.random().toString(36).slice(2, 6)}`,
-            channel: activeChannel,
-            authorId: reaction.authorId,
-            text: reaction.text,
+            id: `msg-${Date.now()}-${reply.authorId}-${Math.random().toString(36).slice(2, 6)}`,
+            channel: sendChannel,
+            authorId: reply.authorId,
+            text: reply.text,
             timestamp: Date.now(),
             reactions: [],
             isRead: false,
           });
-        }, reaction.delay);
+        }, fireAt);
       });
     } catch {
       // Fail silently — don't block the player's message
+      clearTimeout(typingTimer);
+      setTypingAuthorId(null);
     } finally {
       setIsAnalyzing(false);
     }
-  }, [text, activeChannel, messages, morale, addMessage, setMorale, showNotif,
+  }, [text, activeChannel, messages, morale, addMessage, addReaction, setMorale, setTypingAuthorId, firstName, showNotif,
       unlockAchievement, incrementCounter, resetCounter, reportIncident, reportCorporate]);
 
   if (channel?.readOnly) {

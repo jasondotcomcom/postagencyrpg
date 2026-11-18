@@ -9,6 +9,13 @@ import type {
   ChatEventContext,
 } from '../types/chat';
 import { getInitialMessages, getCampaignEventMessages } from '../data/chatMessages';
+import { getAmbientPool, chainId, chainHasPat } from '../data/ambientMessages';
+import type { AmbientMessage } from '../data/ambientMessages';
+import { usePlayerContext } from './PlayerContext';
+import { pickUnseen, recordSpeaker, recordGameEvent, noteAmbientThread, patAllowed } from '../utils/chatMemory';
+import { setChatGameSnapshot } from '../utils/chatGameState';
+import { generateAmbientThread, pickHook, scriptedStateThread, STATE_SHARE } from '../utils/chatEngine';
+import type { AmbientLine } from '../utils/chatEngine';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -19,62 +26,6 @@ const CHANNELS: Channel[] = [
   { id: 'food', name: 'Approved Nutrition', description: 'Mandatory meal documentation', icon: '🍕', readOnly: false },
   { id: 'memes', name: 'Morale Content', description: 'Pre-approved humor only', icon: '🖼️', readOnly: false },
   { id: 'haiku', name: 'Structured Creativity', description: 'Poetry within parameters', icon: '🎋', readOnly: false },
-];
-
-// ─── Ambient Messages ──────────────────────────────────────────────────────
-
-interface AmbientMessage {
-  channel: ChannelId;
-  authorId: string;
-  text: string;
-  imageUrl?: string;
-}
-
-const AMBIENT_MESSAGES: AmbientMessage[] = [
-  // #food
-  { channel: 'food', authorId: 'pm', text: 'The vending machine has been upgraded. All selections now require manager approval.' },
-  { channel: 'food', authorId: 'copywriter', text: 'I ranked every cereal by caloric density. This is what happens when I skip lunch.' },
-  { channel: 'food', authorId: 'hr', text: 'Reminder: Microwaving fish is a terminable offense as of Q3.' },
-  { channel: 'food', authorId: 'strategist', text: 'The salad bar has been "optimized." There are now three kinds of lettuce and nothing else.' },
-  { channel: 'food', authorId: 'copywriter', text: 'Someone labeled their lunch "DO NOT EAT" and honestly that only made it more appealing.' },
-  { channel: 'food', authorId: 'pm', text: 'Floor 2 fridge cleanout is today. If your container has developed sentience, that\'s on you.' },
-  { channel: 'food', authorId: 'hr', text: 'The kombucha in the break room is not company-provided. Please stop expensing it.' },
-  { channel: 'food', authorId: 'strategist', text: 'I\'ve been eating desk granola for three days. I think I\'m becoming the granola.' },
-  { channel: 'food', authorId: 'suit', text: 'Client lunch went well. They ordered for us. We all had salad. Nobody wanted salad.' },
-  { channel: 'food', authorId: 'copywriter', text: 'The coffee machine is working again but it\'s making choices I don\'t agree with.' },
-  // #memes
-  { channel: 'memes', authorId: 'copywriter', text: 'Nobody:\nAbsolutely nobody:\nVance: "Let\'s circle back on this"' },
-  { channel: 'memes', authorId: 'strategist', text: 'Brief says "think outside the box"\nClient feedback: "not like that"', imageUrl: '  BRIEF: Think outside the box\n  ┌─────────────────────┐\n  │  CLIENT: Not like   │\n  │  that. Get back in  │\n  │  the box.           │\n  └─────────────────────┘' },
-  { channel: 'memes', authorId: 'copywriter', text: 'Meetings that could have been emails\n  ╱|、\n(˚ˎ 。7\n |、˜〵\n じしˍ,)ノ\nthat\'s it. that\'s the meme.' },
-  { channel: 'memes', authorId: 'pm', text: 'Timeline: 2 weeks\nScope creep: am I a joke to you\nTimeline: 6 weeks' },
-  { channel: 'memes', authorId: 'strategist', text: '┌──────────────┐\n│  DRAKE  NO:  │ Reading the brief\n├──────────────┤\n│  DRAKE YES:  │ Guessing what the\n│              │ client actually wants\n└──────────────┘', imageUrl: '┌──────────────┐\n│  DRAKE  NO:  │ Reading the brief\n├──────────────┤\n│  DRAKE YES:  │ Guessing what the\n│              │ client actually wants\n└──────────────┘' },
-  { channel: 'memes', authorId: 'copywriter', text: 'POV: you\'re a tagline that survived 7 rounds of feedback\n\n  * * *   BATTLE SCARRED   * * *' },
-  { channel: 'memes', authorId: 'pm', text: '"Can you just make it pop?"\n\n(┛◉Д◉)┛彡┻━┻' },
-  { channel: 'memes', authorId: 'strategist', text: 'The four horsemen of the apocalypse:\n1. "Quick question"\n2. "Per my last email"\n3. "Going forward"\n4. "Let\'s take this offline"' },
-  { channel: 'memes', authorId: 'copywriter', text: 'Me: *writes perfect headline*\nClient: "Can we try something more... blue?"' },
-  { channel: 'memes', authorId: 'pm', text: '  EXPECTATION     REALITY\n ┌─────────┐   ┌─────────┐\n │ Creative │   │ 47 email│\n │ freedom  │   │ threads │\n │          │   │ about   │\n │          │   │ font    │\n │          │   │ size    │\n └─────────┘   └─────────┘' },
-  // #haiku
-  { channel: 'haiku', authorId: 'copywriter', text: 'Standup was cancelled\nThe joy was brief and fragile\nNow we have two more' },
-  { channel: 'haiku', authorId: 'strategist', text: 'That is six syllables.' },
-  { channel: 'haiku', authorId: 'copywriter', text: 'Open plan office\nI can hear you breathing, Greg\nPlease stop doing that' },
-  { channel: 'haiku', authorId: 'pm', text: 'Sprint is almost done\nNew requirements just dropped\nSprint is never done' },
-  { channel: 'haiku', authorId: 'strategist', text: 'The deck is perfect\nClient wants "one small change" though\nThe deck is ruined' },
-  { channel: 'haiku', authorId: 'copywriter', text: 'WiFi is down again\nI am free from all meetings\nNevermind it\'s back' },
-  { channel: 'haiku', authorId: 'suit', text: 'Synergy is key\nLet us leverage our assets\nI don\'t know what that means' },
-  { channel: 'haiku', authorId: 'strategist', text: 'That last line is seven syllables. This channel has standards.' },
-  { channel: 'haiku', authorId: 'pm', text: 'Please update the board\nThe board has too many cards\nPlease update the board' },
-  { channel: 'haiku', authorId: 'copywriter', text: 'My chair was stolen\nI filed a formal complaint\nNow I have no desk' },
-  // #random enhanced
-  { channel: 'random', authorId: 'copywriter', text: 'who keeps moving my chair' },
-  { channel: 'random', authorId: 'pm', text: 'What chair?' },
-  { channel: 'random', authorId: 'copywriter', text: 'MY chair. The one that was at MY desk. It\'s gone. Again.' },
-  { channel: 'random', authorId: 'strategist', text: 'I saw facilities moving furniture at 6am. Could be related.' },
-  { channel: 'random', authorId: 'copywriter', text: 'Is it 4pm already? Is this all there is?' },
-  { channel: 'random', authorId: 'strategist', text: 'Do you ever think about how "deadline" has the word "dead" in it?' },
-  { channel: 'random', authorId: 'pm', text: 'Does anyone else feel like today has been three days long?' },
-  { channel: 'random', authorId: 'copywriter', text: 'The printer on floor 2 has started making decisions on its own. I respect it.' },
-  { channel: 'random', authorId: 'suit', text: 'Has anyone seen my mug? It says "World\'s Most Adequate Employee." It has sentimental value.' },
-  { channel: 'random', authorId: 'strategist', text: 'It\'s 4pm. What are we all doing here. What is the point of anything.' },
 ];
 
 const initialState: ChatState = {
@@ -179,6 +130,26 @@ function chatReducer(state: ChatState, action: ChatAction): ChatState {
   }
 }
 
+// ─── Game events → chat memory ─────────────────────────────────────────────────
+// So later banter (and replies) can reference what happened.
+
+function recordChatEvent(event: ChatCampaignEvent, ctx: ChatEventContext): void {
+  const name = ctx.campaignName ? `"${ctx.campaignName}"` : 'the project';
+  switch (event) {
+    case 'BRIEF_ACCEPTED': recordGameEvent(event, `Took on a new brief from ${ctx.clientName}`); break;
+    case 'NEW_BRIEF_ARRIVED': recordGameEvent(event, `A new brief arrived from ${ctx.clientName}`); break;
+    case 'CAMPAIGN_SCORED_WELL':
+    case 'CAMPAIGN_SCORED_POORLY':
+      if (typeof ctx.score === 'number') {
+        recordGameEvent(event, `${name} for ${ctx.clientName} scored ${ctx.score}/100${event === 'CAMPAIGN_SCORED_POORLY' ? ' — the client was unhappy' : ''}`);
+        setChatGameSnapshot({ lastScore: { campaignName: ctx.campaignName ?? 'the project', clientName: ctx.clientName, score: ctx.score, at: Date.now() } });
+      }
+      break;
+    case 'AWARD_WON': recordGameEvent(event, `${name} won ${ctx.awardName ?? 'an award'}`); break;
+    default: break;
+  }
+}
+
 // ─── Context ──────────────────────────────────────────────────────────────────
 
 interface ChatContextValue extends ChatState {
@@ -218,49 +189,136 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  // Ambient message system — periodically delivers casual messages
-  const sentAmbientRef = useRef<Set<number>>(new Set());
-
+  // Keep the latest state in refs so the long-lived ambient loop can read it.
+  const { playerName } = usePlayerContext();
+  const playerNameRef = useRef(playerName ?? 'there');
+  useEffect(() => { playerNameRef.current = (playerName ?? '').trim().split(/\s+/)[0] || 'there'; }, [playerName]);
+  const messagesRef = useRef<ChatMessage[]>(state.messages);
+  const recordedCountRef = useRef(0);
   useEffect(() => {
-    const scheduleNext = () => {
-      const delay = 45000 + Math.random() * 45000; // 45-90 seconds
-      return setTimeout(() => {
-        // Find unsent messages
-        const unsent = AMBIENT_MESSAGES
-          .map((msg, idx) => ({ msg, idx }))
-          .filter(({ idx }) => !sentAmbientRef.current.has(idx));
+    messagesRef.current = state.messages;
+    // Track who has spoken so replies and ambient threads rotate through the team.
+    if (state.messages.length < recordedCountRef.current) recordedCountRef.current = 0;
+    state.messages.slice(recordedCountRef.current).forEach(m => {
+      if (!m.id.startsWith('seed-')) recordSpeaker(m.authorId);
+    });
+    recordedCountRef.current = state.messages.length;
+  }, [state.messages]);
+  useEffect(() => { setChatGameSnapshot({ morale: state.morale }); }, [state.morale]);
 
-        if (unsent.length === 0) {
-          // All sent — reset pool
-          sentAmbientRef.current.clear();
-          timerId = scheduleNext();
+  // ─── Ambient chat ──────────────────────────────────────────────────────────
+  // Every 45–90s one thread lands in one channel. Most threads are about what's
+  // actually happening in the game (briefs, deadlines, scores, awards, morale,
+  // time of day) — generated live when the tab is visible, otherwise from
+  // state-aware templates. The rest come from each channel's scripted pool,
+  // which never repeats a thread until the pool is exhausted (tracked in save
+  // state, reset on New Game). Pat shows up in at most one in five threads.
+  useEffect(() => {
+    const channelWeights: Array<[ChannelId, number]> = [
+      ['general', 0.25], ['creative', 0.15], ['random', 0.2], ['food', 0.15], ['memes', 0.1], ['haiku', 0.15],
+    ];
+    let lastChannel: ChannelId | null = null;
+    let stopped = false;
+
+    function pickChannel(): ChannelId {
+      const options = channelWeights.filter(([c]) => c !== lastChannel);
+      const total = options.reduce((a, [, w]) => a + w, 0);
+      let roll = Math.random() * total;
+      for (const [c, w] of options) { roll -= w; if (roll <= 0) return c; }
+      return options[0][0];
+    }
+
+    function post(channel: ChannelId, lines: Array<AmbientMessage | AmbientLine>) {
+      let t = 0;
+      lines.forEach((msg, msgIdx) => {
+        const fixed = (msg as AmbientMessage).delayMs;
+        if (msgIdx > 0) t += fixed ?? (1400 + Math.min((msg.text?.length ?? 0) * 30, 3500) + Math.random() * 1500);
+        const msgTimer = setTimeout(() => {
+          timersRef.current.delete(msgTimer);
+          const emoji = (msg as AmbientLine).emoji;
+          const reactions = (msg as AmbientMessage).reactions ?? (emoji ? [{ emoji, count: 1 }] : []);
+          const imageUrl = (msg as AmbientMessage).imageUrl;
+          dispatch({
+            type: 'ADD_MESSAGE',
+            payload: {
+              id: `ambient-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+              channel,
+              authorId: msg.authorId,
+              text: msg.text ?? '',
+              timestamp: Date.now(),
+              reactions,
+              isRead: false,
+              ...(imageUrl ? { imageUrl } : {}),
+            },
+          });
+        }, t);
+        timersRef.current.add(msgTimer);
+      });
+    }
+
+    /** Scripted pool thread, with Pat lines dropped unless Pat is due. */
+    function scriptedPoolThread(channel: ChannelId): { lines: AmbientMessage[]; pat: boolean } | null {
+      const pool = getAmbientPool(channel);
+      const allowPat = patAllowed() && Math.random() < 0.35;
+      const chain = pickUnseen(`pool:${channel}`, pool, c => chainId(channel, c), c => allowPat || !chainHasPat(c) || c.messages.some(m => m.authorId !== 'hr'));
+      if (!chain) return null;
+      const lines = allowPat ? chain.messages : chain.messages.filter(m => m.authorId !== 'hr');
+      if (lines.length === 0) return null;
+      return { lines, pat: lines.some(m => m.authorId === 'hr') };
+    }
+
+    async function runThread() {
+      const channel = pickChannel();
+      lastChannel = channel;
+      const stateDriven = Math.random() < (STATE_SHARE[channel] ?? 0.5);
+      const hook = stateDriven ? pickHook(channel) : null;
+
+      // 1) Live, state-aware thread (only while the tab is visible).
+      if (typeof document === 'undefined' || document.visibilityState === 'visible') {
+        const recent = messagesRef.current
+          .filter(m => m.channel === channel)
+          .slice(-15)
+          .map(m => ({ authorId: m.authorId, text: m.text }));
+        const live = await generateAmbientThread({ channel, playerName: playerNameRef.current, recent, hook });
+        if (stopped) return;
+        if (live) {
+          post(channel, live.lines);
+          noteAmbientThread(live.includedPat);
           return;
         }
+      }
 
-        const pick = unsent[Math.floor(Math.random() * unsent.length)];
-        sentAmbientRef.current.add(pick.idx);
+      // 2) Offline / API failed: state template if this was a state thread.
+      if (hook) {
+        const lines = scriptedStateThread(hook, playerNameRef.current);
+        if (lines) {
+          post(channel, lines);
+          noteAmbientThread(false);
+          return;
+        }
+      }
 
-        dispatch({
-          type: 'ADD_MESSAGE',
-          payload: {
-            id: `ambient-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-            channel: pick.msg.channel,
-            authorId: pick.msg.authorId,
-            text: pick.msg.text,
-            imageUrl: pick.msg.imageUrl,
-            timestamp: Date.now(),
-            reactions: [],
-            isRead: false,
-          },
-        });
+      // 3) Scripted pool.
+      const scripted = scriptedPoolThread(channel);
+      if (scripted) {
+        post(channel, scripted.lines);
+        noteAmbientThread(scripted.pat);
+      }
+    }
 
-        timerId = scheduleNext();
+    function scheduleNext(delay = 45000 + Math.random() * 45000) {
+      const timer = setTimeout(() => {
+        timersRef.current.delete(timer);
+        runThread().catch(() => { /* non-fatal */ }).finally(() => { if (!stopped) scheduleNext(); });
       }, delay);
-    };
+      timersRef.current.add(timer);
+    }
 
-    let timerId = scheduleNext();
+    // First thread soon after load, so a returning player sees chat pick up
+    // where the game is rather than generic banter.
+    scheduleNext(10000 + Math.random() * 6000);
 
-    return () => clearTimeout(timerId);
+    return () => { stopped = true; };
   }, []);
 
   const setActiveChannel = useCallback((channel: ChannelId) => {
@@ -286,6 +344,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
   const triggerCampaignEvent = useCallback(
     (event: ChatCampaignEvent, context: ChatEventContext) => {
       const templates = getCampaignEventMessages(event, context, state.morale);
+      recordChatEvent(event, context);
 
       templates.forEach((template, index) => {
         const delay = 1000 + index * (2000 + Math.random() * 2000);

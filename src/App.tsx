@@ -3,6 +3,7 @@ import { WindowProvider } from './context/WindowContext';
 import { EmailProvider } from './context/EmailContext';
 import { CampaignProvider } from './context/CampaignContext';
 import { ChatProvider } from './context/ChatContext';
+import ChatGameStateBridge from './components/apps/Chat/ChatGameStateBridge';
 import { ReputationProvider, useReputationContext } from './context/ReputationContext';
 import { AgencyFundsProvider } from './context/AgencyFundsContext';
 import { PortfolioProvider } from './context/PortfolioContext';
@@ -252,6 +253,7 @@ function App() {
                       <PortfolioProvider>
                         <EndingProvider>
                           <ConductProvider>
+                            <ChatGameStateBridge />
                             {isMobile ? <MobileAppContent /> : <AppContent />}
                           </ConductProvider>
                         </EndingProvider>

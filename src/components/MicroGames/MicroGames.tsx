@@ -4,6 +4,7 @@ import type { GamePhase, WaitPhase, GameDef, MechanicCategory } from './types';
 import { ALL_GAMES } from './allGames';
 import { useSettingsContext } from '../../context/SettingsContext';
 import styles from './MicroGames.module.css';
+import { recordGameEvent } from '../../utils/chatMemory';
 
 // ─── Props ──────────────────────────────────────────────────────────────────
 
@@ -135,6 +136,9 @@ export default function MicroGames({
       if (first !== undefined) recentRef.current.delete(first);
     }
     lastCategoryRef.current = currentGame!.category;
+
+    // Let team chat reference it later
+    recordGameEvent('MINIGAME', `${won ? 'Nailed' : 'Fumbled'} a quick "${currentGame!.instruction}" mini-game while helping ${member.name.split(' ')[0]}`);
 
     setScore(s => ({ won: s.won + (won ? 1 : 0), total: s.total + 1 }));
     setLastResult({ won, msg });

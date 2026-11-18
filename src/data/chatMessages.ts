@@ -1,177 +1,48 @@
-import type { ChatMessage, ChatCampaignEvent, ChatEventContext, MessageTemplate, MoraleLevel } from '../types/chat';
+import type { ChannelId, ChatMessage, ChatCampaignEvent, ChatEventContext, MessageTemplate, MoraleLevel } from '../types/chat';
+import { getAmbientPool, chainId, chainHasPat } from './ambientMessages';
+import type { AmbientChain } from './ambientMessages';
+import { pickUnseen } from '../utils/chatMemory';
 
 // ─── Seed Messages ────────────────────────────────────────────────────────────
-// These appear when the app first loads to make the Approved Communication Portal feel lived-in
+// Openers that make the Approved Communication Portal feel lived-in. Drawn from
+// each channel's scripted pool with seen-tracking (chatMemory), so a thread
+// never shows up again — as an opener or as ambient chat — until the whole pool
+// has been used. Tracking is saved with the game and cleared on New Game.
+
+const SEED_CHANNELS: ChannelId[] = ['general', 'creative', 'random', 'food', 'memes', 'haiku'];
 
 export function getInitialMessages(): ChatMessage[] {
   const now = Date.now();
+  const out: ChatMessage[] = [];
 
-  return [
-    // #general
-    {
-      id: 'seed-1',
-      channel: 'general',
-      authorId: 'hr',
-      text: 'Reminder: Q3 mandatory training modules are due by Friday. This includes all four modules. Module D (Bloodborne Pathogens) is non-negotiable. This has been documented.',
-      timestamp: now - 7200000,
-      reactions: [],
-      isRead: true,
-    },
-    {
-      id: 'seed-2',
-      channel: 'general',
-      authorId: 'vance',
-      text: 'Good morning team. Let\'s leverage today\'s momentum to ideate around our core deliverables and move the needle on Q3 outcomes. I\'m blocked until 3pm but drop me a ping if anything needs to be surfaced.',
-      timestamp: now - 6800000,
-      reactions: [],
-      isRead: true,
-    },
-    {
-      id: 'seed-3',
-      channel: 'general',
-      authorId: 'pm',
-      text: 'New briefs are in the inbox. I\'ll have scoped timelines by EOD. Please do not start anything until the scope is confirmed and Vance has signed off.',
-      timestamp: now - 6500000,
-      reactions: [],
-      isRead: true,
-    },
-    {
-      id: 'seed-4',
-      channel: 'general',
-      authorId: 'copywriter',
-      text: 'Got it.',
-      timestamp: now - 6300000,
-      reactions: [],
-      isRead: true,
-    },
-    {
-      id: 'seed-5',
-      channel: 'general',
-      authorId: 'hr',
-      text: 'Also: the new EX-22B expense form is live in OmniTrack™. EX-22A is no longer accepted. I have sent a calendar invite for the 10-minute walkthrough on Thursday.',
-      timestamp: now - 5800000,
-      reactions: [],
-      isRead: true,
-    },
+  SEED_CHANNELS.forEach((channel, channelIdx) => {
+    const pool = getAmbientPool(channel);
+    const chainsWanted = channel === 'general' ? 1 + (Math.random() < 0.5 ? 1 : 0) : 1;
+    const picked: AmbientChain[] = [];
+    for (let n = 0; n < chainsWanted; n++) {
+      // Openers never feature Pat — Pat stays rare.
+      const c = pickUnseen(`pool:${channel}`, pool, ch => chainId(channel, ch), ch => !chainHasPat(ch) && !picked.includes(ch));
+      if (c) picked.push(c);
+    }
+    let t = now - 7_200_000 + channelIdx * 600_000;
+    picked.forEach((c, ci) => {
+      c.messages.forEach((m, mi) => {
+        t += mi === 0 ? 900_000 + Math.random() * 600_000 : 60_000 + Math.random() * 180_000;
+        out.push({
+          id: `seed-${channel}-${ci}-${mi}`,
+          channel,
+          authorId: m.authorId,
+          text: m.text,
+          timestamp: Math.min(t, now - 60_000),
+          reactions: m.reactions ?? [],
+          isRead: true,
+          ...(m.imageUrl ? { imageUrl: m.imageUrl } : {}),
+        });
+      });
+    });
+  });
 
-    // #creative — mostly dead
-    {
-      id: 'seed-6',
-      channel: 'creative',
-      authorId: 'copywriter',
-      text: 'Sharing a reference for the brand refresh. Thought it might be useful.',
-      timestamp: now - 48 * 3600000,
-      reactions: [],
-      isRead: true,
-    },
-    {
-      id: 'seed-7',
-      channel: 'creative',
-      authorId: 'strategist',
-      text: 'Thanks.',
-      timestamp: now - 47 * 3600000,
-      reactions: [],
-      isRead: true,
-    },
-
-    // #random — one message, no replies
-    {
-      id: 'seed-8',
-      channel: 'random',
-      authorId: 'copywriter',
-      text: '\uD83E\uDD86',
-      timestamp: now - 72 * 3600000,
-      reactions: [],
-      isRead: true,
-    },
-
-    // #food — Approved Nutrition
-    {
-      id: 'seed-food-1',
-      channel: 'food',
-      authorId: 'hr',
-      text: 'Welcome to #Approved Nutrition. All meal documentation must be submitted by 2pm. Unapproved snacking is a Policy 6.3 violation.',
-      timestamp: now - 96 * 3600000,
-      reactions: [],
-      isRead: true,
-    },
-    {
-      id: 'seed-food-2',
-      channel: 'food',
-      authorId: 'copywriter',
-      text: 'The coffee machine on floor 3 is making a sound that can only be described as "distressed." Proceed with caution.',
-      timestamp: now - 90 * 3600000,
-      reactions: [{ emoji: '\u2615', count: 4 }],
-      isRead: true,
-    },
-    {
-      id: 'seed-food-3',
-      channel: 'food',
-      authorId: 'pm',
-      text: 'Has anyone tried the new cafeteria options? I need to know before I commit 30 minutes of my lunch break.',
-      timestamp: now - 84 * 3600000,
-      reactions: [],
-      isRead: true,
-    },
-
-    // #memes — Morale Content
-    {
-      id: 'seed-memes-1',
-      channel: 'memes',
-      authorId: 'hr',
-      text: 'This channel is for pre-approved morale content only. All submissions are subject to review under Communications Policy 9.1.',
-      timestamp: now - 120 * 3600000,
-      reactions: [],
-      isRead: true,
-    },
-    {
-      id: 'seed-memes-2',
-      channel: 'memes',
-      authorId: 'copywriter',
-      text: 'me: I\'ll leave at 5 today\nmy calendar: lol\nmy slack: lol\nmy laptop at 9pm: lol',
-      timestamp: now - 110 * 3600000,
-      reactions: [{ emoji: '\uD83D\uDE02', count: 5 }],
-      isRead: true,
-    },
-    {
-      id: 'seed-memes-3',
-      channel: 'memes',
-      authorId: 'strategist',
-      text: 'That meme has not been approved. Please submit Form MC-7 for humor clearance.',
-      timestamp: now - 109 * 3600000,
-      reactions: [],
-      isRead: true,
-    },
-
-    // #haiku — Structured Creativity
-    {
-      id: 'seed-haiku-1',
-      channel: 'haiku',
-      authorId: 'hr',
-      text: 'All haiku must conform to 5-7-5 syllable structure. Free verse is not permitted. This is Structured Creativity.',
-      timestamp: now - 130 * 3600000,
-      reactions: [],
-      isRead: true,
-    },
-    {
-      id: 'seed-haiku-2',
-      channel: 'haiku',
-      authorId: 'copywriter',
-      text: 'The brief is too long\nI have read it seven times\nIt still says nothing',
-      timestamp: now - 125 * 3600000,
-      reactions: [{ emoji: '\uD83D\uDC4F', count: 3 }],
-      isRead: true,
-    },
-    {
-      id: 'seed-haiku-3',
-      channel: 'haiku',
-      authorId: 'strategist',
-      text: 'Deck is forty slides\nCould have been an email, but\nWe love suffering',
-      timestamp: now - 120 * 3600000,
-      reactions: [{ emoji: '\uD83D\uDD25', count: 2 }],
-      isRead: true,
-    },
-  ];
+  return out;
 }
 
 // ─── Campaign Event Messages ──────────────────────────────────────────────────
